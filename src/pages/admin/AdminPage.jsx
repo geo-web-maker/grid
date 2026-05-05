@@ -7,6 +7,11 @@ import AssetsAdmin   from './AssetsAdmin'
 import PartsAdmin    from './PartsAdmin'
 import SitesAdmin    from './SitesAdmin'
 
+export default function AdminPage() {
+  const navigate    = useNavigate()
+  const { userProfile } = useAppStore()
+  const [activeTab, setActiveTab] = useState('users')
+
 const ALL_TABS = [
   {
     id: 'users', label: 'Users',
@@ -50,11 +55,6 @@ const ALL_TABS = [
 const TABS = userProfile?.role === 'manager'
   ? ALL_TABS
   : ALL_TABS.filter(t => t.id === 'users')
-
-export default function AdminPage() {
-  const navigate    = useNavigate()
-  const { userProfile } = useAppStore()
-  const [activeTab, setActiveTab] = useState('users')
 
   // Guard — only managers & managers
   if (!['manager', 'supervisor'].includes(userProfile?.role)) {
