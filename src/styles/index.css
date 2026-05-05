@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background-color: #042C53;
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* Phone shell — full viewport, max-width centered */
+  .app-shell {
+    @apply relative flex flex-col h-full max-w-sm mx-auto bg-white overflow-hidden;
+  }
+
+  /* Screen slide transitions */
+  .screen-enter {
+    transform: translateX(100%);
+    transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .screen-enter-active {
+    transform: translateX(0);
+  }
+  .screen-exit {
+    transform: translateX(0);
+    transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .screen-exit-active {
+    transform: translateX(-30%);
+  }
+
+  /* Scroll area */
+  .scroll-area {
+    @apply flex-1 overflow-y-auto overscroll-contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl border border-gray-100 p-4;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap;
+  }
+  .badge-green  { @apply bg-green-50 text-green-700; }
+  .badge-amber  { @apply bg-amber-50 text-amber-700; }
+  .badge-red    { @apply bg-red-50 text-red-700; }
+  .badge-blue   { @apply bg-blue-50 text-blue-700; }
+  .badge-gray   { @apply bg-gray-100 text-gray-600; }
+  .badge-purple { @apply bg-purple-50 text-purple-700; }
+
+  /* Form fields */
+  .field {
+    @apply flex flex-col gap-1;
+  }
+  .field label {
+    @apply text-xs uppercase tracking-wide font-medium text-gray-500;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    @apply w-full text-sm px-3 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-900;
+    @apply focus:outline-none focus:ring-2 focus:ring-navy-800 focus:border-transparent;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .field textarea {
+    resize: none;
+    min-height: 72px;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium;
+    @apply bg-navy-800 text-white active:bg-navy-900 transition-colors;
+  }
+  .btn-secondary {
+    @apply flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium;
+    @apply bg-gray-100 text-gray-700 border border-gray-200 active:bg-gray-200 transition-colors;
+  }
+  .btn-success {
+    @apply flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium;
+    @apply bg-teal-700 text-white active:bg-teal-800 transition-colors;
+  }
+  .btn-danger {
+    @apply flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium;
+    @apply bg-white text-red-600 border border-red-200 active:bg-red-50 transition-colors;
+  }
+
+  /* Asset ID monospace chip */
+  .asset-id {
+    @apply font-mono text-xs text-gray-500;
+  }
+
+  /* Progress bar */
+  .progress-track {
+    @apply w-full bg-gray-100 rounded-full overflow-hidden;
+    height: 5px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.4s ease;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply bg-gray-50 rounded-xl p-3;
+  }
+  .stat-label { @apply text-xs text-gray-500 mb-0.5; }
+  .stat-value { @apply text-2xl font-medium text-gray-900 font-mono; }
+  .stat-hint  { @apply text-xs mt-0.5; }
+}
+
+/* Scrollbar hide on mobile */
+.scroll-area::-webkit-scrollbar { display: none; }
+.scroll-area { scrollbar-width: none; }
+
+/* Safe area support (iOS notch) */
+.bottom-nav-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

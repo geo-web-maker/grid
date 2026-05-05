@@ -1,0 +1,104 @@
+// firestore.rules
+// Deploy with: firebase deploy --only firestore:rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if the user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Helper: check if the user has a given role
+    function hasRole(role) {
+      return isAuth() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+
+    function isTechnician() { return hasRole('technician'); }
+    function isSupervisor()  { return hasRole('supervisor'); }
+    function isManager()     { return hasRole('manager'); }
+    function isStaff()       { return isTechnician() || isSupervisor() || isManager(); }
+
+    // ── Users ──────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isAuth() && (
+        request.auth.uid == userId ||
+        isSupervisor() ||
+        isManager()
+      );
+
+      allow create: if isAuth() && (
+        isManager() ||
+        (
+          isSupervisor() &&
+          request.resource.data.role == 'technician' &&
+          request.resource.data.site_id ==
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.site_id
+        )
+      );
+
+      allow update: if isAuth() && (
+        request.auth.uid == userId ||
+        isManager() ||
+        (
+          isSupervisor() &&
+          resource.data.role == 'technician' &&
+          resource.data.site_id ==
+            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.site_id
+        )
+      );
+
+      allow delete: if isManager();
+    }
+
+    // ── Sites ──────────────────────────────────────────────────────────────
+    match /sites/{siteId} {
+      allow read:  if isAuth();
+      allow write: if isManager();
+    }
+
+    // ── Assets ─────────────────────────────────────────────────────────────
+    match /assets/{assetId} {
+      allow read:   if isAuth();
+      allow create: if isSupervisor() || isManager();
+      allow update: if isStaff();
+      allow delete: if isManager();
+    }
+
+    // ── Maintenance logs ───────────────────────────────────────────────────
+    match /maintenance_logs/{logId} {
+      allow read:   if isAuth();
+
+      // Technicians can only create logs (not update others' logs)
+      allow create: if isStaff() &&
+        request.resource.data.technician_id == request.auth.uid;
+
+      // Supervisors/managers can update (approve, reject)
+      allow update: if isSupervisor() || isManager();
+
+      allow delete: if isManager();
+    }
+
+    // ── Spare parts ────────────────────────────────────────────────────────
+    match /spare_parts/{partId} {
+      allow read:   if isAuth();
+      allow create: if isStaff();
+      allow update: if isSupervisor() || isManager();
+      allow delete: if isManager();
+    }
+
+    // ── Parts catalogue (admin-managed master list)
+    match /parts_catalogue/{partId} {
+      allow read:   if isAuth();
+      allow write:  if isManager();
+    }
+
+    // ── Reminders ──────────────────────────────────────────────────────────
+    match /reminders/{reminderId} {
+      allow read:   if isAuth();
+      allow write:  if isSupervisor() || isManager();
+    }
+  }
+}
