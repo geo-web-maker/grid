@@ -17,12 +17,8 @@ import {
   serverTimestamp,
   onSnapshot,
 } from 'firebase/firestore'
-import {
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from 'firebase/storage'
-import { db, storage } from './firebase'
+import { db } from './firebase'
+import { uploadPhotos } from './r2Storage'
 import { enqueueOperation, saveLocalLog, saveLocalParts, cacheAssets } from './localDb'
 import { nanoid } from '../lib/nanoid'
 
@@ -199,47 +195,6 @@ export async function approveLog(logId, supervisorId) {
     approved_by: supervisorId,
     approved_at: serverTimestamp(),
     updated_at:  serverTimestamp(),
-  })
-}
-
-// ─── Photos ─────────────────────────────────────────────────────────────────
-
-export async function uploadPhotos(logId, files) {
-  const urls = await Promise.all(
-    files.map(async (file, i) => {
-      const path = `maintenance_photos/${logId}/${i}_${file.name}`
-      const ref  = storageRef(storage, path)
-
-      // Compress image before upload
-      const compressed = await compressImage(file, 0.75)
-      const snap        = await uploadBytes(ref, compressed)
-      return getDownloadURL(snap.ref)
-    })
-  )
-  return urls
-}
-
-async function compressImage(file, quality = 0.75) {
-  return new Promise((resolve) => {
-    const img    = new Image()
-    const reader = new FileReader()
-
-    reader.onload = (e) => {
-      img.src = e.target.result
-      img.onload = () => {
-        const MAX   = 1200
-        let { width, height } = img
-        if (width > MAX) { height = (height * MAX) / width; width = MAX }
-        if (height > MAX) { width = (width * MAX) / height; height = MAX }
-
-        const canvas = document.createElement('canvas')
-        canvas.width  = width
-        canvas.height = height
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height)
-        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality)
-      }
-    }
-    reader.readAsDataURL(file)
   })
 }
 
