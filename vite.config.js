@@ -44,11 +44,7 @@ export default defineConfig({
               cacheableResponse: { statuses: [0, 200] }
             }
           }
-        ],
-        backgroundSync: {
-          name: 'logbook-sync-queue',
-          options: { maxRetentionTime: 24 * 60 }
-        }
+        ]
       }
     })
   ],
