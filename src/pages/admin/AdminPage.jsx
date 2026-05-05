@@ -7,7 +7,7 @@ import AssetsAdmin   from './AssetsAdmin'
 import PartsAdmin    from './PartsAdmin'
 import SitesAdmin    from './SitesAdmin'
 
-const TABS = [
+const ALL_TABS = [
   {
     id: 'users', label: 'Users',
     icon: (
@@ -47,7 +47,6 @@ const TABS = [
   },
 ]
 
-// Supervisors only get Users tab
 const TABS = userProfile?.role === 'manager'
   ? ALL_TABS
   : ALL_TABS.filter(t => t.id === 'users')
