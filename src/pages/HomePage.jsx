@@ -33,21 +33,32 @@ const REMINDER_BADGES = {
 }
 
 export default function HomePage() {
-  const navigate   = useNavigate()
-  const { recentLogs, setRecentLogs, reminders, setReminders, userProfile } = useAppStore()
+  const navigate = useNavigate()
+  const {
+    recentLogs, setRecentLogs,
+    reminders, setReminders,
+    assets, setAssets,
+    queueCount,
+  } = useAppStore()
+
   const [loading, setLoading] = useState(!recentLogs.length)
 
   useEffect(() => {
+    // Fetch assets
+    fetchAllAssets().then(setAssets).catch(() => {})
+
+    // Fetch recent logs
     fetchRecentLogs(null, 10).then((logs) => {
       setRecentLogs(logs)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
 
+    // Subscribe to reminders
     const unsub = subscribeToReminders(setReminders)
     return unsub
   }, [])
 
-  const overdueCount = reminders.filter((r) => r.status === 'overdue').length
+  const overdueCount = reminders.filter(r => r.status === 'overdue').length
 
   return (
     <div className="scroll-area">
@@ -55,23 +66,27 @@ export default function HomePage() {
       <div className="grid grid-cols-2 gap-2">
         <div className="stat-card">
           <div className="stat-label">Total assets</div>
-          <div className="stat-value">142</div>
-          <div className="stat-hint text-gray-400">All 4 sites</div>
+          <div className="stat-value">{assets.length}</div>
+          <div className="stat-hint text-gray-400">All sites</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Logs this month</div>
-          <div className="stat-value">38</div>
-          <div className="stat-hint up text-teal-600">+12 vs last mo.</div>
+          <div className="stat-value">{recentLogs.length}</div>
+          <div className="stat-hint text-gray-400">This month</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Pending reminders</div>
           <div className="stat-value">{reminders.length}</div>
-          <div className="stat-hint text-red-500">{overdueCount} overdue</div>
+          <div className="stat-hint text-red-500">
+            {overdueCount > 0 ? `${overdueCount} overdue` : 'All on track'}
+          </div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Offline queue</div>
-          <div className="stat-value">0</div>
-          <div className="stat-hint text-gray-400">All synced</div>
+          <div className="stat-value">{queueCount}</div>
+          <div className="stat-hint text-gray-400">
+            {queueCount === 0 ? 'All synced' : 'Pending sync'}
+          </div>
         </div>
       </div>
 
@@ -149,22 +164,24 @@ export default function HomePage() {
 
       {/* Activity chart */}
       <div className="card">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Activity this month</h3>
-        <div className="flex items-end gap-1.5 h-12">
-          {[40, 62, 45, 80, 100, 55, 70].map((h, i) => (
-            <div
-              key={i}
-              className="flex-1 rounded-t-sm transition-all"
-              style={{ height: `${h}%`, background: i === 4 ? '#0C447C' : '#B5D4F4' }}
-            />
-          ))}
-        </div>
-        <div className="flex justify-between mt-1.5">
-          {['W1','W2','W3','W4','W5','W6','W7'].map((w, i) => (
-            <span key={w} className="text-[10px] font-mono" style={{ color: i === 4 ? '#0C447C' : '#9CA3AF' }}>{w}</span>
-          ))}
-        </div>
+        <h3 className="text-sm font-medium text-gray-900 mb-3">
+          Activity this month
+        </h3>
+        {recentLogs.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-4">
+            No activity yet — logs will appear here
+          </p>
+        ) : (
+          <div className="flex items-end gap-1.5 h-12">
+            {[40, 62, 45, 80, 100, 55, 70].map((h, i) => (
+              <div
+                key={i}
+                className="flex-1 rounded-t-sm"
+                style={{ height: `${h}%`, background: i === 4 ? '#0C447C' : '#B5D4F4' }}
+              />
+            ))}
+          </div>
+        )}
       </div>
-    </div>
   )
 }
