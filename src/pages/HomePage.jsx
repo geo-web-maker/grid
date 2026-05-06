@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAppStore from '../store/useAppStore'
-import { fetchRecentLogs, subscribeToReminders } from '../lib/firestoreService'
+import { fetchRecentLogs, subscribeToReminders, fetchAllAssets } from '../lib/firestoreService'
 
 const STATUS_COLORS = {
   done:      'bg-green-500',
