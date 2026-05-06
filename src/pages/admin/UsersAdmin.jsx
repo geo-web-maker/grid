@@ -100,7 +100,7 @@ const filtered = users.filter(u => {
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2">
-          {ROLES.map(role => {
+          {['technician', 'supervisor', 'manager'].map(role => {
             const count = users.filter(u => u.role === role).length
             return (
               <div key={role} className="stat-card text-center">
