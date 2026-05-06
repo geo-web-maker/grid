@@ -5,13 +5,23 @@ import useAppStore from '../store/useAppStore'
 import { logout } from '../hooks/useAuth'
 import { getPendingQueue } from '../lib/localDb'
 import { runFullSync } from '../lib/syncEngine'
+import { fetchRecentLogs } from '../lib/firestoreService'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
   const { user, userProfile, isOnline, lastSyncedAt, addToast, setSyncing } = useAppStore()
   const [syncing, setSyncingLocal] = useState(false)
   const [queueCount, setQueueCount] = useState(0)
+  const [myLogs, setMyLogs] = useState([])
 
+  useEffect(() => {
+    if (user?.uid) {
+      fetchRecentLogs(user.uid, 100)
+        .then(setMyLogs)
+        .catch(() => {})
+    }
+  }, [user])
+  
   const handleLogout = async () => {
     await logout()
     navigate('/login', { replace: true })
@@ -61,17 +71,15 @@ export default function ProfilePage() {
 
       <div className="scroll-area">
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="stat-card">
-            <div className="stat-label">My logs</div>
-            <div className="stat-value">23</div>
-            <div className="stat-hint text-gray-400">This month</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-label">Completion</div>
-            <div className="stat-value">96%</div>
-            <div className="stat-hint text-teal-600">Above target</div>
-          </div>
+        <div className="stat-card">
+          <div className="stat-label">My logs</div>
+          <div className="stat-value">{myLogs.length}</div>
+          <div className="stat-hint text-gray-400">Total submitted</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Role</div>
+          <div className="stat-value text-lg capitalize">{userProfile?.role || '—'}</div>
+          <div className="stat-hint text-gray-400">{userProfile?.site_id || ''}</div>
         </div>
 
         {/* Account details */}
