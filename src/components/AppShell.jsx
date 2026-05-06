@@ -5,7 +5,7 @@ import useAppStore from '../store/useAppStore'
 const NAV_ITEMS = [
   {
     path: '/',
-    label: 'Home',
+    label: 'Dashboard',
     icon: (
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
         <path d="M3 9l7-7 7 7v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9z" />
@@ -21,14 +21,25 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
-  { path: '/scan', label: 'Scan', isFab: true },
+  {
+    path: '/scan',
+    label: 'Scan QR',
+    isFab: true,
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+        <path d="M2 6V3a1 1 0 011-1h3M14 2h3a1 1 0 011 1v3M18 14v3a1 1 0 01-1 1h-3M6 18H3a1 1 0 01-1-1v-3M6 10h8" />
+      </svg>
+    ),
+  },
   {
     path: '/supervisor',
     label: 'Reports',
     icon: (
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-        <rect x="3" y="3" width="6" height="6" rx="1" /><rect x="11" y="3" width="6" height="6" rx="1" />
-        <rect x="3" y="11" width="6" height="6" rx="1" /><rect x="11" y="11" width="6" height="6" rx="1" />
+        <rect x="3" y="3" width="6" height="6" rx="1" />
+        <rect x="11" y="3" width="6" height="6" rx="1" />
+        <rect x="3" y="11" width="6" height="6" rx="1" />
+        <rect x="11" y="11" width="6" height="6" rx="1" />
       </svg>
     ),
   },
@@ -44,7 +55,7 @@ const NAV_ITEMS = [
 ]
 
 const TITLES = {
-  '/':           ['Dashboard', 'Nalubaale · Kiira sites'],
+  '/':           ['Dashboard'],
   '/assets':     ['Assets', 'All sites'],
   '/scan':       ['Scan QR', 'Point at asset tag'],
   '/supervisor': ['Supervisor', 'Overview'],
@@ -55,7 +66,7 @@ const TITLES = {
 export default function AppShell() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { isOnline, lastSyncedAt, isSyncing } = useAppStore()
+  const { isOnline, lastSyncedAt, isSyncing, userProfile } = useAppStore()
 
   const path     = location.pathname
   const isDetail = path.startsWith('/assets/') || path.startsWith('/log/')
@@ -70,54 +81,153 @@ export default function AppShell() {
     : 'Offline'
 
   return (
-    <div className="app-shell">
-      {/* Status bar mock */}
-      <div className="bg-navy-900 flex justify-between items-center px-4 pt-2.5 pb-2">
-        <span className="text-white text-[13px] font-medium">9:41</span>
-        <div className="flex items-center gap-1.5">
-          <BatteryIcon />
-          <WifiIcon />
-          <SignalIcon />
-        </div>
-      </div>
+    <div className="flex h-full bg-gray-50">
 
-      {/* Top nav */}
-      <div className="bg-navy-900 px-4 pb-3.5 flex items-center justify-between">
-        <div>
-          {isDetail && (
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-1 text-white/70 text-sm mb-0.5"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M10 3L5 8l5 5" />
+      {/* ── Desktop sidebar ── */}
+      <aside className="hidden md:flex flex-col w-56 bg-navy-900 flex-shrink-0">
+        {/* Logo */}
+        <div className="px-5 py-5 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="white" strokeWidth="1.6">
+                <path d="M2 6V3a1 1 0 011-1h3M14 2h3a1 1 0 011 1v3M18 14v3a1 1 0 01-1 1h-3M6 18H3a1 1 0 01-1-1v-3M6 10h8"/>
               </svg>
-              Back
+            </div>
+            <div>
+              <p className="text-white text-sm font-semibold leading-tight">QR Logbook</p>
+              <p className="text-white/40 text-[10px]">UEGCL</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Nav items */}
+        <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
+          {NAV_ITEMS.map((item) => {
+            const active = item.path === '/'
+              ? path === '/'
+              : path.startsWith(item.path)
+
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                  transition-colors text-left w-full
+                  ${active
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/55 hover:bg-white/8 hover:text-white/80'
+                  }
+                  ${item.isFab ? 'mt-2 bg-teal-700/80 text-white hover:bg-teal-700' : ''}
+                `}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            )
+          })}
+
+          {/* Admin link — managers only */}
+          {userProfile?.role === 'manager' && (
+            <button
+              onClick={() => navigate('/admin')}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                transition-colors text-left w-full mt-2
+                ${path === '/admin'
+                  ? 'bg-white/15 text-white'
+                  : 'text-white/55 hover:bg-white/8 hover:text-white/80'
+                }`}
+            >
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+                <rect x="2" y="2" width="7" height="7" rx="1"/>
+                <rect x="11" y="2" width="7" height="7" rx="1"/>
+                <rect x="2" y="11" width="7" height="7" rx="1"/>
+                <rect x="11" y="11" width="7" height="7" rx="1"/>
+              </svg>
+              Admin
             </button>
           )}
-          <p className="text-white text-[17px] font-medium leading-tight">{title}</p>
-          {sub && <p className="text-white/55 text-[11px] mt-0.5">{sub}</p>}
+        </nav>
+
+        {/* Sync status + user */}
+        <div className="px-4 py-4 border-t border-white/10">
+          <div className="flex items-center gap-2 mb-3">
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ background: isOnline ? '#5DCAA5' : '#EF9F27' }}
+            />
+            <span className="text-[11px] text-white/50 truncate">{syncLabel}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+              {userProfile?.name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() || 'U'}
+            </div>
+            <div className="min-w-0">
+              <p className="text-white text-xs font-medium truncate">{userProfile?.name || 'User'}</p>
+              <p className="text-white/40 text-[10px] capitalize truncate">{userProfile?.role || ''}</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* ── Main content area ── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+        {/* Top bar */}
+        <div className="bg-navy-900 md:bg-white md:border-b md:border-gray-100 px-4 md:px-6
+          flex items-center justify-between flex-shrink-0"
+          style={{ minHeight: 52 }}
+        >
+          <div className="flex items-center gap-3">
+            {/* Back button for detail pages */}
+            {isDetail && (
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-1 text-white/70 md:text-gray-500 text-sm"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M10 3L5 8l5 5" />
+                </svg>
+                <span className="hidden md:inline">Back</span>
+              </button>
+            )}
+            <div>
+              <p className="text-white md:text-gray-900 text-base md:text-lg font-semibold leading-tight">
+                {title}
+              </p>
+              {sub && (
+                <p className="text-white/55 md:text-gray-400 text-xs">{sub}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Sync pill — mobile only */}
+          <div className="flex md:hidden items-center gap-1.5 bg-white/10 rounded-full px-2.5 py-1">
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: isOnline ? '#5DCAA5' : '#EF9F27' }}
+            />
+            <span className="text-[10px]" style={{ color: isOnline ? '#9FE1CB' : '#FBBF24' }}>
+              {syncLabel}
+            </span>
+          </div>
+
+          {/* Desktop right side */}
+          <div className="hidden md:flex items-center gap-3">
+            <div className={`flex items-center gap-1.5 text-xs font-medium
+              ${isOnline ? 'text-teal-600' : 'text-amber-500'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-teal-500' : 'bg-amber-400'}`} />
+              {syncLabel}
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-white/10 rounded-full px-2.5 py-1">
-          <span
-            className="w-1.5 h-1.5 rounded-full"
-            style={{ background: isOnline ? '#5DCAA5' : '#EF9F27' }}
-          />
-          <span className="text-[10px]" style={{ color: isOnline ? '#9FE1CB' : '#FBBF24' }}>
-            {syncLabel}
-          </span>
+        {/* Page content */}
+        <div className="flex-1 overflow-hidden">
+          <Outlet />
         </div>
-      </div>
 
-      {/* Page content */}
-      <div className="flex-1 overflow-hidden bg-gray-50">
-        <Outlet />
-      </div>
-
-      {/* Bottom tab bar */}
-      <div className="bn bottom-nav-safe bg-white border-t border-gray-100">
-        <div className="flex">
+        {/* ── Mobile bottom nav ── */}
+        <div className="md:hidden flex border-t border-gray-100 bg-white">
           {NAV_ITEMS.map((item) => {
             const active = item.path === '/'
               ? path === '/'
@@ -163,35 +273,4 @@ function formatRelative(date) {
   if (secs < 60)  return 'just now'
   if (secs < 120) return '1 min ago'
   return `${Math.floor(secs / 60)} min ago`
-}
-
-function SignalIcon() {
-  return (
-    <svg width="15" height="11" viewBox="0 0 15 11" fill="none">
-      <rect x="0" y="5" width="3" height="6" rx="0.5" fill="rgba(255,255,255,0.4)"/>
-      <rect x="4" y="3" width="3" height="8" rx="0.5" fill="rgba(255,255,255,0.65)"/>
-      <rect x="8" y="1" width="3" height="10" rx="0.5" fill="rgba(255,255,255,0.85)"/>
-      <rect x="12" y="0" width="3" height="11" rx="0.5" fill="white"/>
-    </svg>
-  )
-}
-
-function WifiIcon() {
-  return (
-    <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
-      <path d="M7 2.5C9.5 2.5 11.7 3.5 13.2 5.2L14 4.3C12.2 2.3 9.7 1 7 1S1.8 2.3 0 4.3l.8.9C2.3 3.5 4.5 2.5 7 2.5z" fill="rgba(255,255,255,0.55)"/>
-      <path d="M7 5C8.7 5 10.2 5.7 11.3 6.8l.8-.9C10.7 4.7 8.9 4 7 4S3.3 4.7 1.9 5.9l.8.9C3.8 5.7 5.3 5 7 5z" fill="rgba(255,255,255,0.8)"/>
-      <circle cx="7" cy="9" r="1.5" fill="white"/>
-    </svg>
-  )
-}
-
-function BatteryIcon() {
-  return (
-    <svg width="24" height="11" viewBox="0 0 24 11" fill="none">
-      <rect x="0" y="1" width="21" height="9" rx="2" stroke="rgba(255,255,255,0.5)" strokeWidth="1"/>
-      <rect x="1.5" y="2.5" width="15" height="6" rx="1" fill="#5DCAA5"/>
-      <rect x="22" y="3.5" width="2" height="4" rx="1" fill="rgba(255,255,255,0.4)"/>
-    </svg>
-  )
 }
