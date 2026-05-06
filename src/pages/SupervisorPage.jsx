@@ -1,64 +1,99 @@
 // src/pages/SupervisorPage.jsx
 import { useEffect, useState } from 'react'
 import { fetchPendingApprovals, approveLog } from '../lib/firestoreService'
+import { fetchAllAssetsAdmin } from '../lib/adminService'
 import useAppStore from '../store/useAppStore'
 
-const SITES = [
-  { name: 'Nalubaale', pct: 91, color: '#1D9E75' },
-  { name: 'Kiira',     pct: 88, color: '#0C447C' },
-  { name: 'Isimba',    pct: 79, color: '#EF9F27' },
-  { name: 'Karuma',    pct: 72, color: '#E24B4A' },
-]
-
-const TOP_PARTS = [
-  { name: 'Bearing seal 45mm', count: 12, tag: 'Turbines', badge: 'badge-blue' },
-  { name: 'Generator brush set', count: 8, tag: 'All sites', badge: 'badge-purple' },
-  { name: 'Pump impeller O-ring', count: 6, tag: 'Isimba', badge: 'badge-amber' },
-]
-
 export default function SupervisorPage() {
-  const { user, addToast } = useAppStore()
-  const [approvals, setApprovals] = useState([])
-  const [loading, setLoading]     = useState(true)
+  const { user, addToast }          = useAppStore()
+  const [approvals, setApprovals]   = useState([])
+  const [assets, setAssets]         = useState([])
+  const [loading, setLoading]       = useState(true)
 
   useEffect(() => {
-    fetchPendingApprovals()
-      .then(setApprovals)
-      .finally(() => setLoading(false))
+    Promise.all([
+      fetchPendingApprovals(),
+      fetchAllAssetsAdmin(),
+    ]).then(([a, ass]) => {
+      setApprovals(a)
+      setAssets(ass)
+    }).finally(() => setLoading(false))
   }, [])
 
   const handleApprove = async (logId) => {
     try {
       await approveLog(logId, user?.uid)
-      setApprovals((prev) => prev.filter((a) => a.id !== logId))
+      setApprovals(prev => prev.filter(a => a.id !== logId))
       addToast('Log approved', 'success')
     } catch {
       addToast('Approval failed — check connection', 'error')
     }
   }
 
+  // Real stats from Firestore
+  const totalAssets  = assets.length
+  const operational  = assets.filter(a => a.status === 'operational').length
+  const maintenance  = assets.filter(a => a.status === 'maintenance').length
+  const overdue      = assets.filter(a => a.status === 'overdue').length
+
+  // Compliance per site — based on non-overdue assets at each site
+  const sites = [...new Set(assets.map(a => a.site_id))].filter(Boolean)
+  const siteCompliance = sites.map(siteId => {
+    const siteAssets    = assets.filter(a => a.site_id === siteId)
+    const siteOverdue   = siteAssets.filter(a => a.status === 'overdue').length
+    const pct           = siteAssets.length > 0
+      ? Math.round(((siteAssets.length - siteOverdue) / siteAssets.length) * 100)
+      : 100
+    const colors = ['#1D9E75', '#0C447C', '#EF9F27', '#E24B4A', '#378ADD']
+    const idx    = sites.indexOf(siteId)
+    return { name: siteId, pct, color: colors[idx % colors.length] }
+  })
+
   return (
     <div className="scroll-area">
-      {/* Stats */}
+
+      {/* Stats — real data */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="stat-card"><div className="stat-label">Logs · April</div><div className="stat-value">87</div><div className="stat-hint text-teal-600">+23% vs March</div></div>
-        <div className="stat-card"><div className="stat-label">PM compliance</div><div className="stat-value">84%</div><div className="stat-hint text-gray-400">Target: 90%</div></div>
-        <div className="stat-card"><div className="stat-label">Avg retrieval</div><div className="stat-value text-lg">4.2s</div><div className="stat-hint text-teal-600">Was 14 min</div></div>
-        <div className="stat-card"><div className="stat-label">Missing records</div><div className="stat-value">2</div><div className="stat-hint text-red-500">Was 31</div></div>
+        <div className="stat-card">
+          <div className="stat-label">Total assets</div>
+          <div className="stat-value">{totalAssets}</div>
+          <div className="stat-hint text-gray-400">All sites</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Pending approvals</div>
+          <div className="stat-value">{approvals.length}</div>
+          <div className="stat-hint text-amber-500">
+            {approvals.length === 0 ? 'All caught up' : 'Need review'}
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Operational</div>
+          <div className="stat-value">{operational}</div>
+          <div className="stat-hint text-teal-600">Assets active</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Overdue PM</div>
+          <div className="stat-value">{overdue}</div>
+          <div className="stat-hint text-red-500">
+            {overdue === 0 ? 'None overdue' : 'Needs attention'}
+          </div>
+        </div>
       </div>
 
       {/* Pending approvals */}
       <div className="card">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium text-gray-900">Pending approvals</h3>
-          {approvals.length > 0 && <span className="badge badge-amber">{approvals.length}</span>}
+          {approvals.length > 0 && (
+            <span className="badge badge-amber">{approvals.length}</span>
+          )}
         </div>
         {loading ? (
           <div className="h-20 bg-gray-100 rounded-xl animate-pulse" />
         ) : approvals.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-3">All caught up ✓</p>
         ) : (
-          approvals.map((log) => (
+          approvals.map(log => (
             <div key={log.id} className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0">
               <div className="flex-1">
                 <p className="text-xs font-mono font-medium text-gray-900">{log.asset_id}</p>
@@ -75,39 +110,70 @@ export default function SupervisorPage() {
         )}
       </div>
 
-      {/* Compliance by site */}
+      {/* Compliance by site — real data */}
       <div className="card">
         <h3 className="text-sm font-medium text-gray-900 mb-4">Compliance by site</h3>
-        <div className="flex flex-col gap-3.5">
-          {SITES.map((s) => (
-            <div key={s.name}>
-              <div className="flex justify-between text-xs mb-1.5">
-                <span className="text-gray-700">{s.name}</span>
-                <span className="font-mono text-gray-600">{s.pct}%</span>
+        {siteCompliance.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-3">
+            No sites yet — add assets in Admin panel
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3.5">
+            {siteCompliance.map(s => (
+              <div key={s.name}>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-gray-700 capitalize">{s.name}</span>
+                  <span className="font-mono text-gray-600">{s.pct}%</span>
+                </div>
+                <div className="progress-track">
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${s.pct}%`, background: s.color }}
+                  />
+                </div>
               </div>
-              <div className="progress-track">
-                <div className="progress-fill" style={{ width: `${s.pct}%`, background: s.color }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Top spare parts */}
-      <div className="card">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Spare parts · top this month</h3>
-        {TOP_PARTS.map((p) => (
-          <div key={p.name} className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0">
-            <span className="text-xs text-gray-800 flex-1">{p.name}</span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-gray-400">×{p.count}</span>
-              <span className={`badge ${p.badge}`}>{p.tag}</span>
-            </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Retrieval comparison */}
+      {/* Asset status breakdown */}
+      <div className="card">
+        <h3 className="text-sm font-medium text-gray-900 mb-4">Asset status breakdown</h3>
+        {totalAssets === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-3">
+            No assets registered yet
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3.5">
+            {[
+              { label: 'Operational', count: operational, color: '#1D9E75' },
+              { label: 'Under maintenance', count: maintenance, color: '#EF9F27' },
+              { label: 'Overdue PM', count: overdue, color: '#E24B4A' },
+            ].map(s => (
+              <div key={s.label}>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-gray-700">{s.label}</span>
+                  <span className="font-mono text-gray-600">
+                    {s.count} / {totalAssets}
+                  </span>
+                </div>
+                <div className="progress-track">
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${totalAssets > 0 ? (s.count / totalAssets) * 100 : 0}%`,
+                      background: s.color,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Record retrieval comparison — keep as is, it's a fixed comparison */}
       <div className="card">
         <h3 className="text-sm font-medium text-gray-900 mb-4">Record retrieval time</h3>
         <div className="flex items-center gap-4">
@@ -122,6 +188,7 @@ export default function SupervisorPage() {
           </div>
         </div>
       </div>
+
     </div>
   )
 }
