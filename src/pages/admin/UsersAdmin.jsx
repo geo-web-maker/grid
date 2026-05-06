@@ -191,7 +191,7 @@ const filtered = users.filter(u => {
   )
 }
 
-function UserModal({ user, sites, onSave, onClose }) {
+function UserModal({ user, sites, userProfile, onSave, onClose }) {
   const [saving, setSaving] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: user || {
