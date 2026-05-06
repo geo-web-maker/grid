@@ -164,9 +164,7 @@ export default function HomePage() {
 
       {/* Activity chart */}
       <div className="card">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">
-          Activity this month
-        </h3>
+        <h3 className="text-sm font-medium text-gray-900 mb-3">Activity this month</h3>
         {recentLogs.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-4">
             No activity yet — logs will appear here
@@ -183,5 +181,7 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+    </div>
   )
 }
