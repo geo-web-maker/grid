@@ -91,8 +91,9 @@ export async function getLocalLogs(assetId) {
 
 export async function getUnsyncedLogs() {
   const db  = await getLocalDb()
-  const idx = db.transaction('maintenance_logs').store.index('synced')
-  return idx.getAll(false)
+  const tx  = db.transaction('maintenance_logs', 'readonly')
+  const all = await tx.store.getAll()
+  return all.filter(log => log.synced === false)
 }
 
 export async function markLogSynced(id) {
@@ -114,8 +115,9 @@ export async function saveLocalParts(parts) {
 
 export async function getUnsyncedParts() {
   const db  = await getLocalDb()
-  const idx = db.transaction('spare_parts').store.index('synced')
-  return idx.getAll(false)
+  const tx  = db.transaction('spare_parts', 'readonly')
+  const all = await tx.store.getAll()
+  return all.filter(part => part.synced === false)
 }
 
 export async function markPartSynced(id) {
@@ -141,8 +143,9 @@ export async function enqueueOperation(operation) {
 
 export async function getPendingQueue() {
   const db  = await getLocalDb()
-  const idx = db.transaction('offline_queue').store.index('synced')
-  return idx.getAll(false)
+  const tx  = db.transaction('offline_queue', 'readonly')
+  const all = await tx.store.getAll()
+  return all.filter(item => item.synced === false)
 }
 
 export async function markQueueItemSynced(id) {
