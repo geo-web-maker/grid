@@ -7,6 +7,9 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth'
 import {
   getFirestore,
   connectFirestoreEmulator,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
 } from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -26,13 +29,6 @@ export const db = initializeFirestore(app, {
   })
 })
 
-import {
-  getFirestore,
-  connectFirestoreEmulator,
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
-} from 'firebase/firestore'
 
 // Enable offline persistence (IndexedDB-backed Firestore cache)
 //enableIndexedDbPersistence(db).catch((err) => {
