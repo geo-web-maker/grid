@@ -31,7 +31,7 @@ function SplashScreen() {
           <path d="M2 6V3a1 1 0 011-1h3M14 2h3a1 1 0 011 1v3M18 14v3a1 1 0 01-1 1h-3M6 18H3a1 1 0 01-1-1v-3M6 10h8"/>
         </svg>
       </div>
-      <p className="text-white/60 text-sm font-medium">UEGCL QR Logbook</p>
+      <p className="text-white/60 text-sm font-medium">Digital QR Logbook</p>
     </div>
   )
 }
