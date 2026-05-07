@@ -95,7 +95,7 @@ export default function AppShell() {
             </div>
             <div>
               <p className="text-white text-sm font-semibold leading-tight">QR Logbook</p>
-              <p className="text-white/40 text-[10px]">UEGCL</p>
+              <p className="text-white/40 text-[10px]">Kyambogo Workshop</p>
             </div>
           </div>
         </div>
