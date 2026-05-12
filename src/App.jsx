@@ -15,6 +15,7 @@ import SupervisorPage from './pages/SupervisorPage'
 import ProfilePage    from './pages/ProfilePage'
 import AdminPage      from './pages/admin/AdminPage'
 import ToastContainer from './components/ToastContainer'
+import PrintAllQR from './pages/admin/PrintAllQR'
 
 function AuthGuard({ children }) {
   const { user, authReady } = useAppStore()
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="supervisor"        element={<SupervisorPage />} />
           <Route path="profile"           element={<ProfilePage />} />
           <Route path="admin"             element={<AdminPage />} />
+          <Route path="/admin/print-qr"   element={<PrintAllQR />} />
         </Route>
       </Routes>
     </BrowserRouter>
