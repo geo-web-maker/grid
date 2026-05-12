@@ -237,8 +237,9 @@ function AssetModal({ asset, sites, categories, statusOpts, onSave, onClose }) {
   const [saving, setSaving] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: asset || {
-      name: '', category: 'turbine', site_id: '',
-      pm_interval_days: 30, status: 'operational', notes: '',
+      name: '', category: 'other', site_id: '',
+      make: '', model: '', serial_number: '', year_acquired: '',
+      pm_interval_days: 60, status: 'operational', notes: '',
     },
   })
 
@@ -251,24 +252,55 @@ function AssetModal({ asset, sites, categories, statusOpts, onSave, onClose }) {
   return (
     <Modal title={asset ? 'Edit asset' : 'Register new asset'} onClose={onClose}>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 pb-4">
+
+        {/* Name */}
         <div className="field">
-          <label>Asset name *</label>
-          <input placeholder="e.g. Turbine Unit 12"
+          <label>Asset name / description *</label>
+          <input placeholder="e.g. Milford 14&quot; Pedestal Grinder"
             {...register('name', { required: 'Required' })} />
           {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
         </div>
 
+        {/* Make + Model */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="field">
+            <label>Make / Brand</label>
+            <input placeholder="e.g. Vemack"
+              {...register('make')} />
+          </div>
+          <div className="field">
+            <label>Model</label>
+            <input placeholder="e.g. UF25D"
+              {...register('model')} />
+          </div>
+        </div>
+
+        {/* Serial + Year */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="field">
+            <label>Serial number</label>
+            <input placeholder="e.g. 20183009N"
+              {...register('serial_number')} />
+          </div>
+          <div className="field">
+            <label>Year acquired</label>
+            <input placeholder="e.g. 2019"
+              {...register('year_acquired')} />
+          </div>
+        </div>
+
+        {/* Category + Site */}
         <div className="grid grid-cols-2 gap-3">
           <div className="field">
             <label>Category *</label>
             <select {...register('category', { required: true })}>
-              {categories.filter(c => c !== 'All').map(c => (
+              {(categories || []).filter(c => c !== 'All').map(c => (
                 <option key={c} value={c} className="capitalize">{c}</option>
               ))}
             </select>
           </div>
           <div className="field">
-            <label>Site *</label>
+            <label>Site / Location *</label>
             <select {...register('site_id', { required: 'Required' })}>
               <option value="">Select site</option>
               {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -277,6 +309,7 @@ function AssetModal({ asset, sites, categories, statusOpts, onSave, onClose }) {
           </div>
         </div>
 
+        {/* PM interval + Status */}
         <div className="grid grid-cols-2 gap-3">
           <div className="field">
             <label>PM interval (days) *</label>
@@ -284,18 +317,19 @@ function AssetModal({ asset, sites, categories, statusOpts, onSave, onClose }) {
               {...register('pm_interval_days', { required: true, min: 1 })} />
           </div>
           <div className="field">
-            <label>Status</label>
+            <label>Current condition</label>
             <select {...register('status')}>
-            {statusOpts.map(s => (
-              <option key={s} value={s} className="capitalize">{s}</option>
-            ))}
+              {(statusOpts || ['operational','maintenance','overdue','decommissioned']).map(s => (
+                <option key={s} value={s} className="capitalize">{s}</option>
+              ))}
             </select>
           </div>
         </div>
 
+        {/* Notes */}
         <div className="field">
-          <label>Notes</label>
-          <textarea placeholder="Any additional details about this asset..."
+          <label>Notes / observations</label>
+          <textarea placeholder="Recurring problems, missing parts, safety issues..."
             {...register('notes')} />
         </div>
 
