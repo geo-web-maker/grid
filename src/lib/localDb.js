@@ -5,7 +5,7 @@
 
 import { openDB } from 'idb'
 
-const DB_NAME    = 'uegcl-logbook'
+const DB_NAME    = 'kyambogo-logbook'
 const DB_VERSION = 1
 
 let _db = null
