@@ -63,7 +63,7 @@ export default function ProfilePage() {
         <div className="text-center">
           <p className="text-white text-base font-semibold">{userProfile?.name || user?.email || 'User'}</p>
           <p className="text-white/55 text-xs mt-0.5">
-            {userProfile?.role || 'Field Technician'} · {userProfile?.site_id || 'Nalubaale'}
+            {userProfile?.role || 'Technician'} · {userProfile?.site_id || 'Machine Shop'}
           </p>
         </div>
         <span className="badge bg-teal-500/20 text-teal-300 text-xs">Active</span>
@@ -88,9 +88,9 @@ export default function ProfilePage() {
           <table className="w-full text-xs">
             <tbody>
               {[
-                ['Employee ID', userProfile?.employee_id || 'UEGCL-1042'],
-                ['Role',        userProfile?.role        || 'Field Technician'],
-                ['Site',        userProfile?.site_id     || 'Nalubaale'],
+                ['Staff ID',    userProfile?.employee_id || '—'],
+                ['Role',        userProfile?.role        || 'Technician'],
+                ['Site',        userProfile?.site_id     || 'Machine Shop'],
                 ['Email',       user?.email              || '—'],
                 ['Joined',      userProfile?.created_at
                   ? new Date(userProfile.created_at?.toDate?.() || userProfile.created_at).toLocaleDateString('en-UG', { month: 'short', year: 'numeric' })
@@ -185,7 +185,7 @@ export default function ProfilePage() {
         </div>
 
         {/* App version */}
-        <p className="text-center text-xs text-gray-300 font-mono">UEGCL QR Logbook v1.0.0</p>
+        <p className="text-center text-xs text-gray-300 font-mono">KyU QR Logbook v1.0.0</p>
 
         {/* Sign out */}
         <button
