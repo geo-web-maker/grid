@@ -99,12 +99,13 @@ export default function LogPage() {
 
           <div className="field">
             <label>Maintenance type</label>
-            <select {...register('type', { required: true })}>
-              <option value="preventive">Preventive</option>
-              <option value="corrective">Corrective</option>
-              <option value="inspection">Inspection</option>
-              <option value="emergency">Emergency</option>
-            </select>
+              <select {...register('type', { required: true })}>
+                <option value="preventive">Preventive</option>
+                <option value="corrective">Corrective</option>
+                <option value="overhaul">Overhaul</option>
+                <option value="inspection">Inspection</option>
+                <option value="emergency">Emergency</option>
+              </select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -128,8 +129,8 @@ export default function LogPage() {
           </div>
 
           <div className="field">
-            <label>Findings & observations</label>
-            <textarea placeholder="Anomalies, wear, notes..." style={{ minHeight: 60 }} {...register('findings')} />
+            <label>Findings, recurring problems & observations</label>
+            <textarea placeholder="Anomalies, wear, recurring issues, missing parts..." style={{ minHeight: 60 }} {...register('findings')} />
           </div>
         </div>
 
