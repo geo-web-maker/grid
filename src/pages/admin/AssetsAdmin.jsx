@@ -211,6 +211,7 @@ useEffect(() => {
           onSave={handleSave}
           onClose={() => setShowModal(false)}
         />
+      )}
 
       {/* QR Preview modal */}
       {qrPreview && (
