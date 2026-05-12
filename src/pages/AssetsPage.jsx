@@ -3,37 +3,46 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAppStore from '../store/useAppStore'
 import { fetchAllAssets } from '../lib/firestoreService'
+import { fetchCategories } from '../lib/adminService'
 import { getLocalAssets } from '../lib/localDb'
 
-const CATEGORIES = ['All', 'Turbines', 'Generators', 'Pumps', 'Compressors', 'Cooling']
-
 const STATUS_BADGE = {
-  operational: 'badge-green',
-  maintenance: 'badge-amber',
-  overdue:     'badge-red',
+  operational:    'badge-green',
+  maintenance:    'badge-amber',
+  overdue:        'badge-red',
+  decommissioned: 'badge-gray',
 }
 
 const STATUS_LABEL = {
-  operational: 'Active',
-  maintenance: 'Maintenance',
-  overdue:     'Overdue PM',
+  operational:    'Active',
+  maintenance:    'Maintenance',
+  overdue:        'Overdue PM',
+  decommissioned: 'Retired',
 }
 
 export default function AssetsPage() {
   const navigate = useNavigate()
   const { assets, setAssets, isOnline } = useAppStore()
-  const [search, setSearch]   = useState('')
-  const [cat, setCat]         = useState('All')
-  const [loading, setLoading] = useState(!assets.length)
+  const [search, setSearch]         = useState('')
+  const [cat, setCat]               = useState('All')
+  const [loading, setLoading]       = useState(!assets.length)
+  const [categories, setCategories] = useState(['All'])   // ← from DB
 
   useEffect(() => {
     const load = async () => {
       if (isOnline) {
-        const data = await fetchAllAssets()
+        const [data, cats] = await Promise.all([
+          fetchAllAssets(),
+          fetchCategories(),           // ← fetch from DB
+        ])
         setAssets(data)
+        setCategories(cats)
       } else {
         const data = await getLocalAssets()
         setAssets(data)
+        // derive categories from cached assets when offline
+        const cats = ['All', ...new Set(data.map(a => a.category).filter(Boolean))]
+        setCategories(cats)
       }
       setLoading(false)
     }
