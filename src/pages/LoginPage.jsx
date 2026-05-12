@@ -35,21 +35,21 @@ export default function LoginPage() {
         </div>
         <div className="text-center">
           <h1 className="text-white text-2xl font-semibold">QR Logbook</h1>
-          <p className="text-white/55 text-sm mt-1">Uganda Electricity Generation Company</p>
+          <p className="text-white/55 text-sm mt-1">Kyambogo University — Faculty of Engineering</p>
         </div>
       </div>
 
       {/* Login form */}
       <div className="bg-white rounded-t-3xl px-6 pt-8 pb-10">
         <h2 className="text-lg font-semibold text-gray-900 mb-1">Sign in</h2>
-        <p className="text-sm text-gray-500 mb-6">Use your UEGCL employee credentials</p>
+        <p className="text-sm text-gray-500 mb-6">Use your university staff credentials</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="field">
             <label>Email address</label>
             <input
               type="email"
-              placeholder="you@uegcl.co.ug"
+              placeholder="you@kyambogo.ac.ug"
               {...register('email', { required: 'Email is required' })}
             />
             {errors.email && <p className="text-red-500 text-xs mt-0.5">{errors.email.message}</p>}
