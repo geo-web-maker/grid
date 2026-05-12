@@ -42,7 +42,7 @@ export default function SitesAdmin() {
 
   const REGION_COLORS = {
     Central:  'badge-blue',
-    Eastern:  'badge-green',
+    East:  'badge-green',
     Northern: 'badge-amber',
     Western:  'badge-purple',
   }
@@ -99,25 +99,25 @@ export default function SitesAdmin() {
             </div>
           ))
         )}
-  
+        
         {/* Info note */}
-          <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 text-xs text-gray-500">
-            <p className="font-medium text-gray-700 mb-1">About sites</p>
-            Sites represent workshop locations within the Faculty of Engineering. 
-            Deleting a site is not supported — decommission assets individually and reassign users instead.
-          </div>
-        </div> {/* This closes the .scroll-area div */}
-  
-        {showModal && (
-          <SiteModal
-            site={editing}
-            onSave={handleSave}
-            onClose={() => setShowModal(false)}
-          />
-        )}
-      </div> // This closes the main flex-col div
-    )
-  }
+        <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 text-xs text-gray-500">
+          <p className="font-medium text-gray-700 mb-1">About sites</p>
+          Sites represent workshop locations within the Faculty of Engineering.
+          Deleting a site is not supported — decommission assets individually and reassign users instead.
+        </div>
+      </div> {/* closes scroll-area */}
+
+      {showModal && (
+        <SiteModal
+          site={editing}
+          onSave={handleSave}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+    </div> /* closes flex-col */
+  )
+}
 
 function SiteModal({ site, onSave, onClose }) {
   const [saving, setSaving] = useState(false)
@@ -142,8 +142,8 @@ function SiteModal({ site, onSave, onClose }) {
         </div>
 
         <div className="field">
-          <label>Location / town *</label>
-          <input placeholder="e.g. Jinja"
+          <label>Location *</label>
+          <input placeholder="e.g. Faculty Of Engineering"
             {...register('location', { required: 'Required' })} />
           {errors.location && <p className="text-red-500 text-xs">{errors.location.message}</p>}
         </div>
