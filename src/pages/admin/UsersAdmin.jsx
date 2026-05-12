@@ -219,7 +219,7 @@ function UserModal({ user, sites, userProfile, onSave, onClose }) {
           <>
             <div className="field">
               <label>Email address *</label>
-              <input type="email" placeholder="e.g. o.howard@uegcl.co.ug"
+              <input type="email" placeholder="e.g. o.howard@kyambogo.ac.ug"
                 {...register('email', { required: 'Required' })} />
               {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
             </div>
@@ -235,7 +235,7 @@ function UserModal({ user, sites, userProfile, onSave, onClose }) {
 
         <div className="field">
           <label>Employee ID</label>
-          <input placeholder="e.g. UEGCL-1042" {...register('employee_id')} />
+          <input placeholder="e.g. 22/U/IED/1086/GV" {...register('employee_id')} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
