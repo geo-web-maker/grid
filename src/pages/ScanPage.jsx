@@ -63,7 +63,7 @@ export default function ScanPage() {
   }
 
   // Simulate a scan for demo/dev
-  const simulateScan = () => resolveAsset('TRB-012-NLB-22')
+  const simulateScan = () => resolveAsset('OTH-104-KYU-26')
 
   useEffect(() => () => { stopScanner() }, [])
 
