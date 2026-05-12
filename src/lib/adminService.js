@@ -69,17 +69,21 @@ export async function createAsset(data) {
   const id = nanoid()
   const asset = {
     id,
-    asset_code:      generateAssetCode(data.category, data.site_id),
-    name:            data.name,
-    category:        data.category,
-    site_id:         data.site_id,
-    status:          'operational',
+    asset_code:       generateAssetCode(data.category, data.site_id),
+    name:             data.name,
+    category:         data.category,
+    site_id:          data.site_id,
+    status:           data.status || 'operational',
+    make:             data.make        || '',
+    model:            data.model       || '',
+    serial_number:    data.serial_number || '',
+    year_acquired:    data.year_acquired || '',
     pm_interval_days: parseInt(data.pm_interval_days) || 30,
-    installed_at:    serverTimestamp(),
-    next_pm_due:     nextPmDue(parseInt(data.pm_interval_days) || 30),
-    created_at:      serverTimestamp(),
-    updated_at:      serverTimestamp(),
-    notes:           data.notes || '',
+    installed_at:     serverTimestamp(),
+    next_pm_due:      nextPmDue(parseInt(data.pm_interval_days) || 30),
+    created_at:       serverTimestamp(),
+    updated_at:       serverTimestamp(),
+    notes:            data.notes || '',
   }
   await setDoc(doc(db, 'assets', id), asset)
   return asset
@@ -87,8 +91,17 @@ export async function createAsset(data) {
 
 export async function updateAsset(id, data) {
   await updateDoc(doc(db, 'assets', id), {
-    ...data,
-    updated_at: serverTimestamp(),
+    name:             data.name,
+    category:         data.category,
+    site_id:          data.site_id,
+    status:           data.status,
+    make:             data.make        || '',
+    model:            data.model       || '',
+    serial_number:    data.serial_number || '',
+    year_acquired:    data.year_acquired || '',
+    pm_interval_days: parseInt(data.pm_interval_days) || 30,
+    notes:            data.notes || '',
+    updated_at:       serverTimestamp(),
   })
 }
 
