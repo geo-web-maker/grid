@@ -132,7 +132,7 @@ export async function createPart(data) {
 }
 
 export async function updatePart(id, data) {
-  await updateDoc(doc(db, 'parts_catalogue'), {
+  await updateDoc(doc(db, 'parts_catalogue', id), { // <--- Added 'id'
     ...data,
     updated_at: serverTimestamp(),
   })
@@ -209,3 +209,16 @@ function nextPmDue(intervalDays) {
 }
 
 export { CATEGORY_CODES, SITE_CODES }
+
+// ─── Metadata Helpers ────────────────────────────────────────────────────────
+
+export async function fetchCategories() {
+  // Returns the keys of CATEGORY_CODES as an array for dropdowns
+  // In the future, you could fetch these from a 'metadata' collection in Firestore
+  return Object.keys(CATEGORY_CODES)
+}
+
+export async function fetchAssetStatuses() {
+  // Standard statuses used across the app
+  return ['operational', 'maintenance', 'overdue', 'decommissioned']
+}
