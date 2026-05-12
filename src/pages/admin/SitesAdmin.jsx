@@ -99,24 +99,25 @@ export default function SitesAdmin() {
             </div>
           ))
         )}
-
+  
         {/* Info note */}
-        <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 text-xs text-gray-500">
-          <p className="font-medium text-gray-700 mb-1">About sites</p>
-          Sites represent workshop locations within the Faculty of Engineering. 
-          Deleting a site is not supported — decommission assets individually and reassign users instead.
-      </div>
-
-      {showModal && (
-        <SiteModal
-          site={editing}
-          onSave={handleSave}
-          onClose={() => setShowModal(false)}
-        />
-      )}
-    </div>
-  )
-}
+          <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 text-xs text-gray-500">
+            <p className="font-medium text-gray-700 mb-1">About sites</p>
+            Sites represent workshop locations within the Faculty of Engineering. 
+            Deleting a site is not supported — decommission assets individually and reassign users instead.
+          </div>
+        </div> {/* This closes the .scroll-area div */}
+  
+        {showModal && (
+          <SiteModal
+            site={editing}
+            onSave={handleSave}
+            onClose={() => setShowModal(false)}
+          />
+        )}
+      </div> // This closes the main flex-col div
+    )
+  }
 
 function SiteModal({ site, onSave, onClose }) {
   const [saving, setSaving] = useState(false)
