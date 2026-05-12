@@ -4,16 +4,12 @@ import { useForm } from 'react-hook-form'
 import {
   fetchAllAssetsAdmin, createAsset,
   updateAsset, deleteAsset, fetchAllSites,
-  CATEGORY_CODES,
+  fetchCategories, fetchAssetStatuses,
 } from '../../lib/adminService'
 import { generateQRDataUrl, printQRTag, downloadQRPng } from '../../lib/qrGenerator'
 import useAppStore from '../../store/useAppStore'
 import Modal from '../../components/admin/Modal'
 import ConfirmDialog from '../../components/admin/ConfirmDialog'
-
-const CATEGORIES = Object.keys(CATEGORY_CODES)
-
-const STATUS_OPTS = ['operational', 'maintenance', 'overdue', 'decommissioned']
 
 const STATUS_BADGE = {
   operational:    'badge-green',
@@ -33,12 +29,25 @@ export default function AssetsAdmin() {
   const [qrPreview, setQrPreview]   = useState(null) // { asset, dataUrl }
   const [search,    setSearch]      = useState('')
   const [catFilter, setCatFilter]   = useState('All')
+  const [categories, setCategories] = useState([])
+  const [statusOpts, setStatusOpts] = useState(['operational','maintenance','overdue','decommissioned'])
 
-  useEffect(() => {
-    Promise.all([fetchAllAssetsAdmin(), fetchAllSites()])
-      .then(([a, s]) => { setAssets(a); setSites(s) })
-      .finally(() => setLoading(false))
-  }, [])
+  
+useEffect(() => {
+  Promise.all([
+    fetchAllAssetsAdmin(),
+    fetchAllSites(),
+    fetchCategories(),
+    fetchAssetStatuses(),
+  ])
+    .then(([a, s, cats, statuses]) => {
+      setAssets(a)
+      setSites(s)
+      setCategories(cats)                                    // ← from DB
+      if (statuses.length) setStatusOpts(statuses)          // ← from DB, fallback to default
+    })
+    .finally(() => setLoading(false))
+}, [])
 
   const openCreate = () => { setEditing(null); setShowModal(true) }
   const openEdit   = (a) => { setEditing(a); setShowModal(true) }
@@ -108,7 +117,7 @@ export default function AssetsAdmin() {
 
         {/* Category filter */}
         <div className="flex gap-1.5 overflow-x-auto pb-1">
-          {['All', ...CATEGORIES].map(c => (
+          {categories.map(c => (
             <button
               key={c}
               onClick={() => setCatFilter(c)}
@@ -197,10 +206,11 @@ export default function AssetsAdmin() {
         <AssetModal
           asset={editing}
           sites={sites}
+          categories={categories}
+          statusOpts={statusOpts}
           onSave={handleSave}
           onClose={() => setShowModal(false)}
         />
-      )}
 
       {/* QR Preview modal */}
       {qrPreview && (
@@ -223,7 +233,7 @@ export default function AssetsAdmin() {
   )
 }
 
-function AssetModal({ asset, sites, onSave, onClose }) {
+function AssetModal({ asset, sites, categories, statusOpts, onSave, onClose }) {
   const [saving, setSaving] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: asset || {
@@ -252,7 +262,7 @@ function AssetModal({ asset, sites, onSave, onClose }) {
           <div className="field">
             <label>Category *</label>
             <select {...register('category', { required: true })}>
-              {CATEGORIES.map(c => (
+              {categories.filter(c => c !== 'All').map(c => (
                 <option key={c} value={c} className="capitalize">{c}</option>
               ))}
             </select>
@@ -276,9 +286,9 @@ function AssetModal({ asset, sites, onSave, onClose }) {
           <div className="field">
             <label>Status</label>
             <select {...register('status')}>
-              {STATUS_OPTS.map(s => (
-                <option key={s} value={s} className="capitalize">{s}</option>
-              ))}
+            {statusOpts.map(s => (
+              <option key={s} value={s} className="capitalize">{s}</option>
+            ))}
             </select>
           </div>
         </div>
