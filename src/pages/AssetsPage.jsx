@@ -54,7 +54,7 @@ export default function AssetsPage() {
       a.name?.toLowerCase().includes(search.toLowerCase()) ||
       a.asset_code?.toLowerCase().includes(search.toLowerCase()) ||
       a.site_id?.toLowerCase().includes(search.toLowerCase())
-    const matchCat = cat === 'All' || a.category?.toLowerCase().includes(cat.toLowerCase().slice(0,-1))
+    const matchCat = cat === 'All' || a.category === cat
     return matchSearch && matchCat
   })
 
@@ -69,7 +69,7 @@ export default function AssetsPage() {
       />
 
       <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-        {CATEGORIES.map((c) => (
+        {categories.map((c) => (
           <button
             key={c}
             onClick={() => setCat(c)}
