@@ -53,14 +53,17 @@ export default function AssetDetailPage() {
           <h3 className="text-sm font-medium text-gray-900 mb-3">Asset info</h3>
           <table className="w-full text-xs">
             <tbody>
-              {[
-                ['Category',    asset.category],
-                ['Location',    asset.site_id],
-                ['Installed',   asset.installed_at?.toDate?.()?.toLocaleDateString() || 'N/A'],
-                ['PM interval', `Every ${asset.pm_interval_days || 30} days`],
-                ['Next PM due', asset.next_pm_due?.toDate?.()?.toLocaleDateString() || 'N/A'],
-                ['Total logs',  `${logs.length} entries`],
-              ].map(([label, val]) => (
+                {[
+                  ['Category',      asset.category],
+                  ['Make / Brand',  asset.make          || '—'],
+                  ['Model',         asset.model         || '—'],
+                  ['Serial No.',    asset.serial_number || '—'],
+                  ['Year acquired', asset.year_acquired || '—'],
+                  ['Location',      asset.site_id],
+                  ['PM interval',   `Every ${asset.pm_interval_days || 30} days`],
+                  ['Next PM due',   asset.next_pm_due?.toDate?.()?.toLocaleDateString() || 'N/A'],
+                  ['Total logs',    `${logs.length} entries`],
+                ].map(([label, val]) => (
                 <tr key={label} className="border-t border-gray-50 first:border-0">
                   <td className="text-gray-400 py-1.5 w-2/5">{label}</td>
                   <td className="text-gray-900 font-medium py-1.5">{val}</td>
