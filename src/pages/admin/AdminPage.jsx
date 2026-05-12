@@ -15,7 +15,15 @@ export default function AdminPage() {
   const [isSeeding, setIsSeeding] = useState(false)
 
   // ── Seed Logic ─────────────────────────────────────────────────────────────
-  const handleResetDatabase = async () => {
+const handleResetDatabase = async () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    
+    // Safety check to prevent the 'undefined' error
+    if (!apiUrl || apiUrl === 'undefined') {
+      alert("❌ Configuration Error: VITE_API_URL is not set in environment variables.");
+      return;
+    }
+
     const confirmFirst = window.confirm("Are you sure? This will restore Kyambogo University base assets and parts.");
     if (!confirmFirst) return;
 
@@ -25,7 +33,8 @@ export default function AdminPage() {
     setIsSeeding(true);
     try {
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/seed-data`, {
+      // Using the apiUrl variable we checked above
+      const response = await fetch(`${apiUrl}/admin/seed-data`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -35,13 +44,14 @@ export default function AdminPage() {
 
       if (response.ok) {
         alert("✅ Database Seeded Successfully!");
-        window.location.reload(); // Refresh to see new data
+        window.location.reload(); 
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ error: 'Unknown server error' }));
         alert("❌ Error: " + errorData.error);
       }
     } catch (err) {
-      alert("❌ Failed to connect to server.");
+      console.error("Seed Error:", err);
+      alert("❌ Failed to connect to server. Ensure backend is running.");
     } finally {
       setIsSeeding(false);
     }
