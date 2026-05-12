@@ -63,7 +63,7 @@ export default function App() {
           <Route path="supervisor"        element={<SupervisorPage />} />
           <Route path="profile"           element={<ProfilePage />} />
           <Route path="admin"             element={<AdminPage />} />
-          <Route path="/admin/print-qr"   element={<PrintAllQR />} />
+          <Route path="admin/print-qr"   element={<PrintAllQR />} />
         </Route>
       </Routes>
     </BrowserRouter>
