@@ -15,6 +15,8 @@ export default function ScanPage() {
   const [scanned, setScanned]   = useState(null)
   const [scanning, setScanning] = useState(false)
   const [error, setError]       = useState('')
+  const [isManual, setIsManual] = useState(false)
+  const [manualCode, setManualCode] = useState('')
 
   const startScanner = async () => {
     if (scannerRef.current) return
@@ -61,9 +63,6 @@ export default function ScanPage() {
     }
     setScanned(asset)
   }
-
-  // Simulate a scan for demo/dev
-  const simulateScan = () => resolveAsset('OTH-104-KYU-26')
 
   useEffect(() => () => { stopScanner() }, [])
 
@@ -125,12 +124,45 @@ export default function ScanPage() {
               Stop scanning
             </button>
           )}
-          <button onClick={simulateScan} className="text-white/50 text-xs">
-            Simulate scan (demo)
-          </button>
-          <button className="text-white/50 text-xs">
-            Enter asset ID manually
-          </button>
+          {isManual ? (
+              <div className="flex flex-col w-full gap-2 mt-2">
+                <input
+                  type="text"
+                  placeholder="Enter Asset ID..."
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#5DCAA5]"
+                  value={manualCode}
+                  onChange={(e) => setManualCode(e.target.value)}
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => {
+                        resolveAsset(manualCode.trim().toUpperCase());
+                        setIsManual(false); // Close input on search
+                    }}
+                    className="flex-1 py-2.5 bg-[#5DCAA5] text-[#042C53] rounded-xl font-bold text-sm"
+                  >
+                    Find Asset
+                  </button>
+                  <button 
+                    onClick={() => setIsManual(false)}
+                    className="px-4 py-2 text-white/50 text-xs"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button 
+                onClick={() => {
+                  if (scanning) stopScanner(); // Stop camera if manual is clicked
+                  setIsManual(true);
+                }}
+                className="text-white/50 text-xs hover:text-white transition-colors"
+              >
+                Enter asset ID manually
+              </button>
+            )}
         </div>
 
         {error && (
