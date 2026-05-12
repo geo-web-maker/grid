@@ -158,21 +158,21 @@ export async function updateSite(id, data) {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const CATEGORY_CODES = {
-  turbine:    'TRB',
-  generator:  'GEN',
-  pump:       'PMP',
-  compressor: 'CMP',
-  cooling:    'CLG',
-  transformer:'TRF',
-  other:      'OTH',
+  lathe:    'LTH',
+  grinder:  'GRD',
+  milling:  'MIL',
+  welder:   'WLD',
+  shaper:   'SHP',
+  shearing: 'SHR',
+  hobbing:  'HOB',
+  other:    'OTH',
 }
 
 const SITE_CODES = {
-  nalubaale: 'NLB',
-  kiira:     'KLA',
-  isimba:    'ISM',
-  karuma:    'KRU',
+  'machine-shop':        'MCH',
+  'welding-fabrication': 'WLD',
 }
+
 
 export function generateAssetCode(category, siteId) {
   const catCode  = CATEGORY_CODES[category] || 'OTH'
