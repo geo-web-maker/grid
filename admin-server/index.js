@@ -175,6 +175,28 @@ app.post('/enable-user', verifyToken, async (req, res) => {
   }
 })
 
+// ── POST /admin/seed-data ────────────────────────────────────────────────────
+app.post('/admin/seed-data', verifyToken, async (req, res) => {
+  const caller = req.callerProfile
+  
+  // Only the manager should be able to trigger a data reset
+  if (caller?.role !== 'manager') {
+    return res.status(403).json({ error: 'Permission denied' })
+  }
+
+  try {
+    const batch = db.batch()
+    
+    // 1. Add your Kyambogo SITES and ASSETS logic here...
+    // (Paste the loops from the seed.js I gave you earlier)
+
+    await batch.commit()
+    res.json({ success: true, message: "Database re-seeded successfully" })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // ── Start server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
