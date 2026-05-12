@@ -52,7 +52,7 @@ export default function SitesAdmin() {
       <div className="scroll-area">
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-sm font-medium text-gray-900">Hydropower sites</p>
+            <p className="text-sm font-medium text-gray-900">Workshop sites</p>
             <p className="text-xs text-gray-400 mt-0.5">{sites.length} registered</p>
           </div>
           <button onClick={openCreate} className="btn-primary text-sm px-4 py-2.5">
@@ -103,9 +103,8 @@ export default function SitesAdmin() {
         {/* Info note */}
         <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 text-xs text-gray-500">
           <p className="font-medium text-gray-700 mb-1">About sites</p>
-          Sites are assigned to both users (their home site) and assets (where they're located). 
+          Sites represent workshop locations within the Faculty of Engineering. 
           Deleting a site is not supported — decommission assets individually and reassign users instead.
-        </div>
       </div>
 
       {showModal && (
@@ -136,7 +135,7 @@ function SiteModal({ site, onSave, onClose }) {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 pb-4">
         <div className="field">
           <label>Site name *</label>
-          <input placeholder="e.g. Nalubaale Power Station"
+          <input placeholder="e.g. Machine Shop"
             {...register('name', { required: 'Required' })} />
           {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
         </div>
