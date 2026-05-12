@@ -176,27 +176,66 @@ app.post('/enable-user', verifyToken, async (req, res) => {
 })
 
 // ── POST /admin/seed-data ────────────────────────────────────────────────────
+// This route populates the Kyambogo University data
 app.post('/admin/seed-data', verifyToken, async (req, res) => {
   const caller = req.callerProfile
-  
-  // Only the manager should be able to trigger a data reset
+
+  // Only allow 'manager' to trigger the seed
   if (caller?.role !== 'manager') {
-    return res.status(403).json({ error: 'Permission denied' })
+    return res.status(403).json({ error: 'Permission denied. Manager role required.' })
   }
 
   try {
     const batch = db.batch()
-    
-    // 1. Add your Kyambogo SITES and ASSETS logic here...
-    // (Paste the loops from the seed.js I gave you earlier)
+
+    // --- 1. SITES DATA ---
+    const SITES = [
+      { id: "machine-shop", name: "Machine Shop", location: "Faculty of Engineering, Kyambogo", region: "Kampala" },
+      { id: "welding-fabrication", name: "Welding and Fabrication", location: "Faculty of Engineering, Kyambogo", region: "Kampala" }
+    ]
+
+    // --- 2. ASSETS DATA ---
+    const ASSETS = [
+      { id: "asset-001", asset_code: "OTH-101-KYU-26", name: "Milford 14\" Pedestal Grinder", category: "other", site_id: "machine-shop", status: "maintenance", pm_interval_days: 90, notes: "Belt replaced. Grinding wheel clearing needed." },
+      { id: "asset-002", asset_code: "OTH-102-KYU-26", name: "Shearing Machine (Guillotine)", category: "other", site_id: "welding-fabrication", status: "maintenance", pm_interval_days: 60, notes: "Recurring: blade misalignment." },
+      { id: "asset-003", asset_code: "OTH-103-KYU-26", name: "A-C Arc Welder", category: "other", site_id: "welding-fabrication", status: "operational", pm_interval_days: 90, notes: "Damage to cables by students." },
+      { id: "asset-004", asset_code: "OTH-104-KYU-26", name: "CNC Vertical Milling Machine", category: "other", site_id: "machine-shop", status: "operational", pm_interval_days: 30, notes: "Recurring issues: air pipe breakage." },
+      { id: "asset-005", asset_code: "OTH-105-KYU-26", name: "Conventional Lathe", category: "other", site_id: "machine-shop", status: "maintenance", pm_interval_days: 60, notes: "Needs repair." },
+      { id: "asset-006", asset_code: "OTH-106-KYU-26", name: "Universal Milling Machine", category: "other", site_id: "machine-shop", status: "operational", pm_interval_days: 30, notes: "Good condition." },
+      { id: "asset-007", asset_code: "OTH-107-KYU-26", name: "Surface Grinder", category: "other", site_id: "machine-shop", status: "maintenance", pm_interval_days: 60, notes: "Troubleshooting DC output relay." },
+      { id: "asset-008", asset_code: "OTH-108-KYU-26", name: "Mascot Lathe", category: "other", site_id: "machine-shop", status: "overdue", pm_interval_days: 90, notes: "Restoring cross-slide carrier." }
+    ]
+
+    // --- 3. PARTS DATA ---
+    const PARTS = [
+      { name: 'Pneumatic Air Hose (8mm)', part_code: 'CNC-PH-08', category: 'Pneumatics', unit: 'metre', supplier: 'Kampala Industrial Equipment' },
+      { name: 'CNC Tool Holder BT40', part_code: 'CNC-TH-BT40', category: 'Tooling', unit: 'piece', supplier: 'Vemack Official' },
+      { name: 'Lathe Drive Belt', part_code: 'LTH-BELT-B', category: 'Belts', unit: 'piece', supplier: 'Industrial Belts Ltd' },
+      { name: "Welding Electrode Holder", part_code: "WLD-EH-300", category: "Welding", unit: "piece", supplier: "Desbro Uganda" },
+      { name: "Grinding Wheel (14 inch)", part_code: "GRD-WHL-14", category: "Consumables", unit: "piece", supplier: "Hardware World" },
+      { name: "Machine Oil ISO 68", part_code: "LUB-OIL-68", category: "Lubricants", unit: "litre", supplier: "TotalEnergies Uganda" }
+    ]
+
+    // Execution
+    SITES.forEach(s => batch.set(db.collection('sites').doc(s.id), s))
+    ASSETS.forEach(a => {
+      batch.set(db.collection('assets').doc(a.id), {
+        ...a,
+        created_at: admin.firestore.FieldValue.serverTimestamp(),
+        updated_at: admin.firestore.FieldValue.serverTimestamp()
+      })
+    })
+    PARTS.forEach(p => {
+      const ref = db.collection('parts_catalogue').doc()
+      batch.set(ref, { ...p, in_stock: true, current_stock: 10, created_at: admin.firestore.FieldValue.serverTimestamp() })
+    })
 
     await batch.commit()
-    res.json({ success: true, message: "Database re-seeded successfully" })
+    res.json({ success: true, message: "Kyambogo data seeded!" })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }
 })
-
 // ── Start server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
