@@ -81,7 +81,7 @@ export default function AppShell() {
     : 'Offline'
 
   return (
-    <div className="flex h-full bg-gray-50">
+    <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
 
       {/* ── Desktop sidebar ── */}
       <aside className="hidden md:flex flex-col w-56 bg-navy-900 flex-shrink-0">
