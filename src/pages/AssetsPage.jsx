@@ -59,7 +59,7 @@ export default function AssetsPage() {
   })
 
   return (
-   <div className="flex flex-col gap-4 p-4" style={{ minHeight: '150vh' }}>
+   <div className="p-4 flex flex-col gap-4">
       <input
         type="text"
         placeholder="Search by ID, name, or site..."
