@@ -59,7 +59,7 @@ export default function AssetsPage() {
   })
 
   return (
-    <div className="scroll-area">
+    <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
       <input
         type="text"
         placeholder="Search by ID, name, or site..."
