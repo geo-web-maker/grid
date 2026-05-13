@@ -50,7 +50,7 @@ export default function SupervisorPage() {
   })
 
   return (
-    <div className="p-4 flex flex-col gap-4 pb-8">
+    <div className="p-4 flex flex-col gap-4">
 
       {/* Stats — real data */}
       <div className="grid grid-cols-2 gap-2">
