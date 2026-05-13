@@ -59,9 +59,7 @@ export default function AssetsPage() {
   })
 
   return (
-    AssetsPage.jsx: 
-    style={{ border: '5px solid red', minHeight: '150vh' }}
-    <div className="flex flex-col gap-4 p-4">
+   <div className="flex flex-col gap-4 p-4" style={{ minHeight: '150vh' }}>
       <input
         type="text"
         placeholder="Search by ID, name, or site..."
