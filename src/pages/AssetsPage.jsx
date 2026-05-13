@@ -59,6 +59,8 @@ export default function AssetsPage() {
   })
 
   return (
+    AssetsPage.jsx: 
+    style={{ border: '5px solid red', minHeight: '150vh' }}
     <div className="flex flex-col gap-4 p-4">
       <input
         type="text"
