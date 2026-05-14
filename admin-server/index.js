@@ -236,6 +236,57 @@ app.post('/admin/seed-data', verifyToken, async (req, res) => {
     res.status(500).json({ error: err.message })
   }
 })
+
+// ── Schedule Task ─────────────────────────────────────────────────────────────
+app.post('/schedule-task', verifyToken, async (req, res) => {
+  const caller = req.callerProfile
+  if (!['head_of_department', 'technician'].includes(caller?.role)) {
+    return res.status(403).json({ error: 'Permission denied' })
+  }
+  const { asset_id, scheduled_for, task_type, notes, assigned_to } = req.body
+  try {
+    const ref = db.collection('scheduled_tasks').doc()
+    await ref.set({
+      asset_id, scheduled_for, task_type,
+      notes: notes || '',
+      assigned_to: assigned_to || null,
+      created_by: req.uid,
+      status: 'pending',
+      created_at: admin.firestore.FieldValue.serverTimestamp(),
+    })
+    res.json({ id: ref.id })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// ── Assest report ─────────────────────────────────────────────────────────────
+app.get('/asset-report/:assetId', verifyToken, async (req, res) => {
+  // All roles can access — no role restriction beyond being logged in
+  try {
+    const assetDoc = await db.collection('assets').doc(req.params.assetId).get()
+    if (!assetDoc.exists) return res.status(404).json({ error: 'Asset not found' })
+
+    const logsSnap = await db.collection('maintenance_logs')
+      .where('asset_id', '==', req.params.assetId)
+      .orderBy('logged_at', 'desc').limit(20).get()
+
+    const partsSnap = await db.collection('spare_parts')
+      .where('asset_id', '==', req.params.assetId)
+      .orderBy('used_at', 'desc').limit(50).get()
+
+    res.json({
+      asset: { id: assetDoc.id, ...assetDoc.data() },
+      logs:  logsSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+      parts: partsSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+      generated_at: new Date().toISOString(),
+      generated_by: req.uid,
+    })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // ── Start server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
