@@ -1,7 +1,7 @@
 // src/pages/AssetDetailPage.jsx
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { fetchAssetByCode, fetchLogsForAsset } from '../lib/firestoreService'
+import { fetchAssetByCode, fetchLogsForAsset, fetchPartsForAsset } from '../lib/firestoreService'
 import { getLocalAssetByCode } from '../lib/localDb'
 import useAppStore from '../store/useAppStore'
 import { fetchAssetReport } from '../lib/adminService'
@@ -12,6 +12,7 @@ export default function AssetDetailPage() {
   const { isOnline, addToast } = useAppStore()
   const [asset, setAsset]   = useState(null)
   const [logs,  setLogs]    = useState([])
+  const [parts, setParts]   = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -21,18 +22,31 @@ export default function AssetDetailPage() {
         : await getLocalAssetByCode(assetCode)
       setAsset(a)
       if (a) {
-        const l = await fetchLogsForAsset(a.id)
+        const [l, p] = await Promise.all([
+          fetchLogsForAsset(a.id),
+          fetchPartsForAsset(a.id),
+        ])
         setLogs(l)
+        setParts(p)
       }
       setLoading(false)
     }
     load()
   }, [assetCode])
 
-  const handlePrintReport = async () => {
-  try {
-      const report = await fetchAssetReport(asset.id)
+  const handlePrintReport = () => {
+    try {
+      const report = {
+        asset,
+        logs,
+        parts,
+        generated_at: new Date().toISOString(),
+      }
       const win = window.open('', '_blank')
+      if (!win) {
+        addToast('Allow popups to print reports', 'warning')
+        return
+      }
       win.document.write(buildReportHTML(report))
       win.document.close()
       win.print()
@@ -108,7 +122,7 @@ export default function AssetDetailPage() {
       </div>
 
       {/* CTA */}
-      <div className="grid grid-cols-3 gap-2 p-3.5 border-t border-gray-100 bg-white">
+    <div className="grid grid-cols-3 gap-2 p-3.5 border-t border-gray-100 bg-white flex-shrink-0">
         <button className="btn-secondary text-sm" onClick={() => navigate('/scan')}>Scan QR</button>
         <button className="btn-secondary text-sm" onClick={handlePrintReport}>Print report</button>
         <button className="btn-primary text-sm"   onClick={() => navigate(`/log/${asset.asset_code}`)}>Log maintenance</button>
