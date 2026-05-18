@@ -77,6 +77,17 @@ export async function fetchLogsForAsset(assetId, maxCount = 20) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
 }
 
+export async function fetchPartsForAsset(assetId) {
+  const q = query(
+    collection(db, 'spare_parts'),
+    where('asset_id', '==', assetId),
+    orderBy('used_at', 'desc'),
+    limit(50)
+  )
+  const snap = await getDocs(q)
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+}
+
 export async function fetchRecentLogs(technicianId = null, maxCount = 30) {
   let q = query(
     collection(db, 'maintenance_logs'),
