@@ -113,10 +113,10 @@ app.post('/disable-user', verifyToken, async (req, res) => {
   const caller = req.callerProfile
   const { uid } = req.body
 
-  if (!['manager', 'supervisor'].includes(caller?.role)) {
-    return res.status(403).json({ error: 'Permission denied' })
+  if (caller?.role !== 'head_of_department') {
+  return res.status(403).json({ error: 'Permission denied' })
   }
-
+  
   if (uid === req.uid) {
     return res.status(400).json({ error: 'Cannot disable your own account' })
   }
@@ -124,15 +124,6 @@ app.post('/disable-user', verifyToken, async (req, res) => {
   try {
     const targetDoc = await db.collection('users').doc(uid).get()
     const target    = targetDoc.data()
-
-    if (caller.role === 'supervisor') {
-      if (target?.role !== 'technician') {
-        return res.status(403).json({ error: 'Supervisors can only disable technicians' })
-      }
-      if (target?.site_id !== caller.site_id) {
-        return res.status(403).json({ error: 'Cannot disable users from another site' })
-      }
-    }
 
     await auth.updateUser(uid, { disabled: true })
     await db.collection('users').doc(uid).update({
@@ -151,8 +142,8 @@ app.post('/disable-user', verifyToken, async (req, res) => {
 app.post('/enable-user', verifyToken, async (req, res) => {
   const caller = req.callerProfile
 
-  if (caller?.role !== 'manager') {
-    return res.status(403).json({ error: 'Only managers can enable users' })
+ if (caller?.role !== 'head_of_department') {
+  return res.status(403).json({ error: 'Only head of department can enable users' })
   }
 
   const { uid } = req.body
@@ -177,10 +168,10 @@ app.post('/admin/seed-data', verifyToken, async (req, res) => {
   const caller = req.callerProfile
 
   // Only allow 'manager' to trigger the seed
-  if (caller?.role !== 'manager') {
-    return res.status(403).json({ error: 'Permission denied. Manager role required.' })
-  }
-
+if (caller?.role !== 'head_of_department') {
+  return res.status(403).json({ error: 'Permission denied. Head of department role required.' })
+}
+  
   try {
     const batch = db.batch()
 
@@ -212,6 +203,73 @@ app.post('/admin/seed-data', verifyToken, async (req, res) => {
       { name: "Machine Oil ISO 68", part_code: "LUB-OIL-68", category: "Lubricants", unit: "litre", supplier: "TotalEnergies Uganda" }
     ]
 
+    // --- 4. USERS SEED DATA ---
+    const USERS_SEED = [
+      {
+        id: 'seed-hod-001',
+        name: 'Dr. Mukasa Robert',
+        email: 'r.mukasa@kyambogo.ac.ug',
+        role: 'head_of_department',
+        site_id: 'machine-shop',
+        employee_id: '22/HOD/ENG/001',
+        disabled: false,
+      },
+      {
+        id: 'seed-tech-001',
+        name: 'Ocen Howard',
+        email: 'o.howard@kyambogo.ac.ug',
+        role: 'technician',
+        site_id: 'machine-shop',
+        employee_id: '22/TECH/MS/002',
+        disabled: false,
+      },
+      {
+        id: 'seed-tech-002',
+        name: 'Nakato Brenda',
+        email: 'b.nakato@kyambogo.ac.ug',
+        role: 'technician',
+        site_id: 'welding-fabrication',
+        employee_id: '22/TECH/WF/003',
+        disabled: false,
+      },
+      {
+        id: 'seed-sup-001',
+        name: 'Opio James',
+        email: 'j.opio@kyambogo.ac.ug',
+        role: 'supervisor',
+        site_id: 'machine-shop',
+        employee_id: '22/SUP/MS/004',
+        disabled: false,
+      },
+      {
+        id: 'seed-lec-001',
+        name: 'Ms. Nambi Grace',
+        email: 'g.nambi@kyambogo.ac.ug',
+        role: 'lecturer',
+        site_id: 'machine-shop',
+        employee_id: '22/LEC/ENG/005',
+        disabled: false,
+      },
+      {
+        id: 'seed-stu-001',
+        name: 'Ssemakula Ivan',
+        email: 'ivan.ssemakula@students.kyambogo.ac.ug',
+        role: 'student',
+        site_id: 'machine-shop',
+        employee_id: '22/U/IED/1086/GV',
+        disabled: false,
+      },
+      {
+        id: 'seed-stu-002',
+        name: 'Achieng Faith',
+        email: 'faith.achieng@students.kyambogo.ac.ug',
+        role: 'student',
+        site_id: 'welding-fabrication',
+        employee_id: '22/U/IED/1142/GV',
+        disabled: false,
+      },
+    ]
+    
     // Execution
     SITES.forEach(s => batch.set(db.collection('sites').doc(s.id), s))
     ASSETS.forEach(a => {
@@ -225,7 +283,15 @@ app.post('/admin/seed-data', verifyToken, async (req, res) => {
       const ref = db.collection('parts_catalogue').doc()
       batch.set(ref, { ...p, in_stock: true, current_stock: 10, created_at: admin.firestore.FieldValue.serverTimestamp() })
     })
-
+    
+    USERS_SEED.forEach(u => {
+      batch.set(db.collection('users').doc(u.id), {
+        ...u,
+        created_at: admin.firestore.FieldValue.serverTimestamp(),
+        created_by: 'seed',
+      })
+    })
+    
     await batch.commit()
     res.json({ success: true, message: "Kyambogo data seeded!" })
   } catch (err) {
@@ -236,7 +302,7 @@ app.post('/admin/seed-data', verifyToken, async (req, res) => {
 // ── Schedule Task ─────────────────────────────────────────────────────────────
 app.post('/schedule-task', verifyToken, async (req, res) => {
   const caller = req.callerProfile
-  if (!['head_of_department', 'technician'].includes(caller?.role)) {
+  if (!['head_of_department', 'technician', 'supervisor'].includes(caller?.role)) {
     return res.status(403).json({ error: 'Permission denied' })
   }
   const { asset_id, scheduled_for, task_type, notes, assigned_to } = req.body
