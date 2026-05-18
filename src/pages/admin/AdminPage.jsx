@@ -7,6 +7,7 @@ import UsersAdmin    from './UsersAdmin'
 import AssetsAdmin   from './AssetsAdmin'
 import PartsAdmin    from './PartsAdmin'
 import SitesAdmin    from './SitesAdmin'
+import ScheduleAdmin from './ScheduleAdmin'
 
 export default function AdminPage() {
   const navigate = useNavigate()
@@ -64,14 +65,24 @@ const handleResetDatabase = async () => {
     { id: 'sites', label: 'Sites', icon: ( <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10 2C6.686 2 4 4.686 4 8c0 5.25 6 10 6 10s6-4.75 6-10c0-3.314-2.686-6-6-6z"/><circle cx="10" cy="8" r="2"/></svg> ) },
     { id: 'print', label: 'Print QR', icon: ( <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" /><path d="M6 14h12v8H6z" /></svg> ) },
     // NEW SYSTEM TAB
+    {
+        id: 'schedule',
+        label: 'Schedule',
+        icon: (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+          </svg>
+        )
+    },
     { id: 'system', label: 'System', icon: ( <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg> ) },
   ]
 
-  const TABS = userProfile?.role === 'manager'
-    ? ALL_TABS
-    : ALL_TABS.filter(t => t.id === 'users')
 
-  if (!['manager', 'supervisor'].includes(userProfile?.role)) {
+  const TABS = ALL_TABS
+
+  if (userProfile?.role !== 'head_of_department') {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 px-8 text-center">
         <p className="text-sm font-medium text-gray-900">Access restricted</p>
@@ -103,6 +114,7 @@ const handleResetDatabase = async () => {
         {activeTab === 'assets' && <AssetsAdmin />}
         {activeTab === 'parts'  && <PartsAdmin />}
         {activeTab === 'sites'  && <SitesAdmin />}
+        {activeTab === 'schedule' && <ScheduleAdmin />}
         
         {/* NEW SYSTEM VIEW */}
         {activeTab === 'system' && (
