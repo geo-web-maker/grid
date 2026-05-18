@@ -9,7 +9,8 @@ import useAppStore from '../store/useAppStore'
 export default function LogPage() {
   const { assetCode }    = useParams()
   const navigate         = useNavigate()
-  const { user, isOnline, addToast } = useAppStore()
+  const { user, isOnline, addTconst { user, userProfile, isOnline, addToast } = useAppStore()
+  const canSubmit = ['head_of_department', 'technician', 'supervisor'].includes(userProfile?.role)oast } = useAppStore()
   const [photos, setPhotos]       = useState([])
   const [submitting, setSub]      = useState(false)
   const [catalogue, setCatalogue] = useState([])
@@ -90,6 +91,18 @@ export default function LogPage() {
               <path d="M8 1l7 13H1L8 1z"/><path d="M8 6v4M8 12v.5"/>
             </svg>
             <p className="text-xs text-amber-700">You're offline. This entry will be saved locally and synced when connectivity returns.</p>
+          </div>
+        )}
+
+        {/* Read-only notice for lecturer and student */}
+        {!canSubmit && (
+          <div className="flex gap-2.5 items-start bg-blue-50 border border-blue-200 rounded-xl px-3.5 py-3">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#185FA5" strokeWidth="1.5" className="flex-shrink-0 mt-0.5">
+              <circle cx="8" cy="8" r="7"/><path d="M8 7v4M8 5v.5"/>
+            </svg>
+            <p className="text-xs text-blue-700">
+              Your role has read-only access. You can view this record but cannot submit changes.
+            </p>
           </div>
         )}
 
@@ -217,7 +230,11 @@ export default function LogPage() {
         <button type="button" className="btn-secondary text-sm" onClick={() => navigate(-1)}>
           Cancel
         </button>
-        <button type="submit" disabled={submitting} className="btn-success text-sm disabled:opacity-60">
+        <button
+          type="submit"
+          disabled={submitting || !canSubmit}
+          className="btn-success text-sm disabled:opacity-60"
+        >
           {submitting ? 'Saving…' : 'Submit log'}
         </button>
       </div>
