@@ -70,19 +70,16 @@ app.get('/health', (_, res) => {
 app.post('/create-user', verifyToken, async (req, res) => {
   const caller = req.callerProfile
 
-  if (!['manager', 'supervisor'].includes(caller?.role)) {
+  if (caller?.role !== 'head_of_department') {
     return res.status(403).json({ error: 'Permission denied' })
   }
 
   const { name, email, password, role, site_id, employee_id } = req.body
 
-  if (caller.role === 'supervisor') {
-    if (role !== 'technician') {
-      return res.status(403).json({ error: 'Supervisors can only create technicians' })
-    }
-    if (site_id !== caller.site_id) {
-      return res.status(403).json({ error: 'Supervisors can only add users to their own site' })
-    }
+  // Validate that the role being assigned is one of the known roles
+  const VALID_ROLES = ['head_of_department', 'technician', 'supervisor', 'lecturer', 'student']
+  if (!VALID_ROLES.includes(role)) {
+    return res.status(400).json({ error: `Invalid role: ${role}` })
   }
 
   try {
@@ -111,7 +108,6 @@ app.post('/create-user', verifyToken, async (req, res) => {
     res.status(500).json({ error: err.message })
   }
 })
-
 // ── POST /disable-user ───────────────────────────────────────────────────────
 app.post('/disable-user', verifyToken, async (req, res) => {
   const caller = req.callerProfile
