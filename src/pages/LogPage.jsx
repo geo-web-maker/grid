@@ -9,13 +9,13 @@ import useAppStore from '../store/useAppStore'
 export default function LogPage() {
   const { assetCode }    = useParams()
   const navigate         = useNavigate()
-  const { user, isOnline, addTconst { user, userProfile, isOnline, addToast } = useAppStore()
+  const { user, userProfile, isOnline, addToast } = useAppStore()
   const canSubmit = ['head_of_department', 'technician', 'supervisor'].includes(userProfile?.role)
   const [photos, setPhotos]       = useState([])
   const [submitting, setSub]      = useState(false)
   const [catalogue, setCatalogue] = useState([])
   const fileRef = useRef()
-
+  
   useEffect(() => {
     fetchPartsCatalogue().then(setCatalogue).catch(() => {})
   }, [])
