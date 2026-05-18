@@ -1,4 +1,5 @@
 // src/components/AppShell.jsx
+import { useState, useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import useAppStore from '../store/useAppStore'
 
@@ -80,6 +81,15 @@ export default function AppShell() {
       : 'Online'
     : 'Offline'
 
+  const [, setTick] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick(t => t + 1)
+    }, 30_000) // re-renders every 30 seconds
+    return () => clearInterval(interval)
+  }, [])
+  
   return (
     <div className="flex h-screen w-full bg-gray-50 overflow-hidden"   style={{ height: '100dvh' }}>
 
