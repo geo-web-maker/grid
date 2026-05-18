@@ -243,3 +243,21 @@ export async function upsertUserProfile(uid, data) {
     { merge: true }
   )
 }
+
+// ─── Scheduled Tasks ─────────────────────────────────────────────────────────
+
+export async function fetchScheduledTasks(assetId = null) {
+  let q = query(
+    collection(db, 'scheduled_tasks'),
+    orderBy('scheduled_for', 'asc')
+  )
+  if (assetId) {
+    q = query(
+      collection(db, 'scheduled_tasks'),
+      where('asset_id', '==', assetId),
+      orderBy('scheduled_for', 'asc')
+    )
+  }
+  const snap = await getDocs(q)
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+}
