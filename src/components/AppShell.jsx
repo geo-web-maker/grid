@@ -58,9 +58,9 @@ const TITLES = {
   '/':           ['Dashboard'],
   '/assets':     ['Assets', 'All sites'],
   '/scan':       ['Scan QR', 'Point at asset tag'],
-  '/supervisor': ['Supervisor', 'Overview'],
+  '/supervisor': ['Reports', 'Overview'],
   '/profile':    ['My profile', ''],
-  '/admin':      ['Admin panel', 'Manager access only'],
+  '/admin':      ['Admin panel', 'Head of department only'],
 }
 
 export default function AppShell() {
@@ -127,7 +127,7 @@ export default function AppShell() {
           })}
 
           {/* Admin link — managers only */}
-          {userProfile?.role === 'manager' && (
+          {userProfile?.role === 'head_of_department' && (
             <button
               onClick={() => navigate('/admin')}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
@@ -163,7 +163,9 @@ export default function AppShell() {
             </div>
             <div className="min-w-0">
               <p className="text-white text-xs font-medium truncate">{userProfile?.name || 'User'}</p>
-              <p className="text-white/40 text-[10px] capitalize truncate">{userProfile?.role || ''}</p>
+              <p className="text-white/40 text-[10px] capitalize truncate">
+                {(userProfile?.role || '').replace(/_/g, ' ')}
+              </p>
             </div>
           </div>
         </div>
