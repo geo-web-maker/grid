@@ -1,6 +1,6 @@
 // src/lib/adminService.js
 // All Firestore operations for the admin section.
-// Only callable by users with role: 'manager'.
+// Admin operations restricted by role. See ROLES constants below.
 
 import {
   collection, doc, getDocs, getDoc,
@@ -10,6 +10,20 @@ import {
 import { getAuth } from 'firebase/auth'
 import { db } from './firebase'
 import { nanoid } from './nanoid'
+
+// ─── Role constants ───────────────────────────────────────────────────────────
+
+export const ROLES = {
+  HEAD_OF_DEPARTMENT: 'head_of_department',
+  TECHNICIAN:         'technician',
+  SUPERVISOR:         'supervisor',
+  LECTURER:           'lecturer',
+  STUDENT:            'student',
+}
+
+export const CAN_WRITE_ROLES  = ['head_of_department', 'technician', 'supervisor']
+export const READ_ONLY_ROLES  = ['lecturer', 'student']
+export const ADMIN_ONLY_ROLES = ['head_of_department']
 
 // ─── Users ──────────────────────────────────────────────────────────────────
 
@@ -50,6 +64,18 @@ export async function disableUser(uid) {
   return json
 }
 
+export async function enableUser(uid) {
+  const headers = await getAuthHeader()
+  const res = await fetch(`${API}/enable-user`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...headers },
+    body:    JSON.stringify({ uid }),
+  })
+  const json = await res.json()
+  if (!res.ok) throw new Error(json.error)
+  return json
+}
+
 export async function updateUserProfile(uid, data) {
   await updateDoc(doc(db, 'users', uid), {
     ...data,
@@ -57,6 +83,25 @@ export async function updateUserProfile(uid, data) {
   })
 }
 
+export async function scheduleTask(data) {
+  const headers = await getAuthHeader()
+  const res = await fetch(`${API}/schedule-task`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...headers },
+    body:    JSON.stringify(data),
+  })
+  const json = await res.json()
+  if (!res.ok) throw new Error(json.error)
+  return json
+}
+
+export async function fetchAssetReport(assetId) {
+  const headers = await getAuthHeader()
+  const res = await fetch(`${API}/asset-report/${assetId}`, { headers })
+  const json = await res.json()
+  if (!res.ok) throw new Error(json.error)
+  return json
+}
 
 // ─── Assets ─────────────────────────────────────────────────────────────────
 
