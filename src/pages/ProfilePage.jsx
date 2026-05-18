@@ -63,7 +63,7 @@ export default function ProfilePage() {
         <div className="text-center">
           <p className="text-white text-base font-semibold">{userProfile?.name || user?.email || 'User'}</p>
           <p className="text-white/55 text-xs mt-0.5">
-            {userProfile?.role || 'Technician'} · {userProfile?.site_id || 'Machine Shop'}
+            {(userProfile?.role || 'technician').replace(/_/g, ' ')} · {userProfile?.site_id || 'Machine Shop'}
           </p>
         </div>
         <span className="badge bg-teal-500/20 text-teal-300 text-xs">Active</span>
@@ -78,7 +78,9 @@ export default function ProfilePage() {
         </div>
         <div className="stat-card">
           <div className="stat-label">Role</div>
-          <div className="stat-value text-lg capitalize">{userProfile?.role || '—'}</div>
+          <div className="stat-value text-lg capitalize">
+            {(userProfile?.role || '—').replace(/_/g, ' ')}
+          </div>
           <div className="stat-hint text-gray-400">{userProfile?.site_id || ''}</div>
         </div>
 
@@ -89,7 +91,7 @@ export default function ProfilePage() {
             <tbody>
               {[
                 ['Staff ID',    userProfile?.employee_id || '—'],
-                ['Role',        userProfile?.role        || 'Technician'],
+                ['Role',       (userProfile?.role        || 'technician').replace(/_/g, ' ')],
                 ['Site',        userProfile?.site_id     || 'Machine Shop'],
                 ['Email',       user?.email              || '—'],
                 ['Joined',      userProfile?.created_at
@@ -135,8 +137,8 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* Admin panel — managers only */}
-        {userProfile?.role === 'manager' && (
+        {/* Admin panel — Head of Department only */}
+        {userProfile?.role === 'head_of_department' && (
           <button
             onClick={() => navigate('/admin')}
             className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl
