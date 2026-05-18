@@ -81,7 +81,7 @@ export default function AppShell() {
     : 'Offline'
 
   return (
-    <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
+    <div className="flex h-screen w-full bg-gray-50 overflow-hidden"   style={{ height: '100dvh' }}>
 
       {/* ── Desktop sidebar ── */}
       <aside className="hidden md:flex flex-col w-56 bg-navy-900 flex-shrink-0">
@@ -224,12 +224,12 @@ export default function AppShell() {
         </div>
 
         {/* Page content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pb-16 md:pb-0">
           <Outlet />
         </div>
 
         {/* ── Mobile bottom nav ── */}
-        <div className="md:hidden flex border-t border-gray-100 bg-white">
+        <div className="md:hidden flex border-t border-gray-100 bg-white z-50 flex-shrink-0"   style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
           {NAV_ITEMS.map((item) => {
             const active = item.path === '/'
               ? path === '/'
