@@ -8,9 +8,11 @@ import Modal from '../../components/admin/Modal'
 import ConfirmDialog from '../../components/admin/ConfirmDialog'
 
 const ROLE_BADGE = {
-  technician: 'badge-blue',
-  supervisor: 'badge-amber',
-  manager:    'badge-purple',
+  head_of_department: 'badge-purple',
+  technician:         'badge-blue',
+  supervisor:         'badge-amber',
+  lecturer:           'badge-green',
+  student:            'badge-gray',
 }
 
 export default function UsersAdmin() {
@@ -74,9 +76,9 @@ const filtered = users.filter(u => {
     u.employee_id?.toLowerCase().includes(search.toLowerCase())
 
   // Supervisors only see users at their own site
-  const matchSite = userProfile?.role === 'manager'
-    ? true
-    : u.site_id === userProfile?.site_id
+const matchSite = userProfile?.role === 'head_of_department'
+  ? true
+  : u.site_id === userProfile?.site_id
 
   return matchSearch && matchSite
 })
@@ -100,12 +102,12 @@ const filtered = users.filter(u => {
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2">
-          {['technician', 'supervisor', 'manager'].map(role => {
+          {['head_of_department', 'technician', 'supervisor', 'lecturer', 'student'].map(role => {
             const count = users.filter(u => u.role === role).length
             return (
               <div key={role} className="stat-card text-center">
                 <div className="stat-value text-lg">{count}</div>
-                <div className="stat-label capitalize">{role}s</div>
+                <div className="stat-label capitalize">{role.replace(/_/g, ' ')}</div>
               </div>
             )
           })}
@@ -123,9 +125,11 @@ const filtered = users.filter(u => {
             <div key={user.id} className="card flex items-center gap-3">
               {/* Avatar */}
               <div className={`w-10 h-10 rounded-full flex items-center justify-center
-                text-white text-sm font-semibold flex-shrink-0
-                ${user.role === 'manager' ? 'bg-purple-500' :
-                  user.role === 'supervisor' ? 'bg-amber-500' : 'bg-navy-700'}`}>
+                text-white text-sm font-semibold flex-shrink-0// NEW
+                ${user.role === 'head_of_department' ? 'bg-purple-500' :
+                  user.role === 'supervisor' ? 'bg-amber-500' :
+                  user.role === 'lecturer'   ? 'bg-teal-500'  :
+                  user.role === 'student'    ? 'bg-gray-400'  : 'bg-navy-700'}`}>
                 {user.name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() || '?'}
               </div>
 
@@ -242,29 +246,17 @@ function UserModal({ user, sites, userProfile, onSave, onClose }) {
           <div className="field">
             <label>Role *</label>
             <select {...register('role', { required: true })}>
-                {(userProfile?.role === 'manager'
-                  ? ['technician', 'supervisor', 'manager']
-                  : ['technician']
-                ).map(r => (
-                  <option key={r} value={r} className="capitalize">{r}</option>
-                ))}
+            {['technician', 'supervisor', 'lecturer', 'student', 'head_of_department'].map(r => (
+              <option key={r} value={r}>{r.replace(/_/g, ' ')}</option>
+            ))}
             </select>
           </div>
           <div className="field">
             <label>Site *</label>
-            {userProfile?.role === 'supervisor' ? (
-              <input
-                value={userProfile.site_id}
-                disabled
-                className="opacity-60 cursor-not-allowed bg-gray-50"
-                {...register('site_id')}
-              />
-            ) : (
               <select {...register('site_id', { required: 'Required' })}>
                 <option value="">Select site</option>
                 {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
-            )}
             {errors.site_id && <p className="text-red-500 text-xs">{errors.site_id.message}</p>}
           </div>
         </div>
