@@ -1,22 +1,30 @@
 // src/pages/SupervisorPage.jsx
 import { useEffect, useState } from 'react'
-import { fetchPendingApprovals, approveLog } from '../lib/firestoreService'
-import { fetchAllAssetsAdmin } from '../lib/adminService'
+import { fetchPendingApprovals, approveLog, fetchScheduledTasks } from '../lib/firestoreService'
+import { fetchAllAssetsAdmin, scheduleTask, CAN_WRITE_ROLES } from '../lib/adminService'
 import useAppStore from '../store/useAppStore'
 
 export default function SupervisorPage() {
-  const { user, addToast }          = useAppStore()
-  const [approvals, setApprovals]   = useState([])
-  const [assets, setAssets]         = useState([])
-  const [loading, setLoading]       = useState(true)
-
+  const { user, userProfile, addToast } = useAppStore()
+  const canWrite = CAN_WRITE_ROLES.includes(userProfile?.role)
+  const [approvals,  setApprovals]  = useState([])
+  const [assets,     setAssets]     = useState([])
+  const [scheduled,  setScheduled]  = useState([])
+  const [loading,    setLoading]    = useState(true)
+  const [showForm,   setShowForm]   = useState(false)
+  const [form,       setForm]       = useState({
+    asset_id: '', scheduled_for: '', task_type: 'preventive', notes: ''
+  })
+  
   useEffect(() => {
     Promise.all([
       fetchPendingApprovals(),
       fetchAllAssetsAdmin(),
-    ]).then(([a, ass]) => {
+      fetchScheduledTasks(),
+    ]).then(([a, ass, sched]) => {
       setApprovals(a)
       setAssets(ass)
+      setScheduled(sched)
     }).finally(() => setLoading(false))
   }, [])
 
@@ -29,6 +37,22 @@ export default function SupervisorPage() {
       addToast('Approval failed — check connection', 'error')
     }
   }
+
+  const handleSchedule = async () => {
+  if (!form.asset_id || !form.scheduled_for) {
+    addToast('Asset and date are required', 'warning')
+    return
+  }
+  try {
+    await scheduleTask(form)
+    addToast('Task scheduled', 'success')
+    setShowForm(false)
+    setForm({ asset_id: '', scheduled_for: '', task_type: 'preventive', notes: '' })
+    fetchScheduledTasks().then(setScheduled)
+  } catch (err) {
+    addToast(err.message || 'Failed to schedule task', 'error')
+  }
+}
 
   // Real stats from Firestore
   const totalAssets  = assets.length
@@ -99,12 +123,14 @@ export default function SupervisorPage() {
                 <p className="text-xs font-mono font-medium text-gray-900">{log.asset_id}</p>
                 <p className="text-xs text-gray-500">{log.technician_id} · {log.type}</p>
               </div>
-              <button
-                onClick={() => handleApprove(log.id)}
-                className="px-3 py-1.5 bg-teal-700 text-white text-xs font-medium rounded-lg"
-              >
-                Approve
-              </button>
+             {canWrite && (
+                <button
+                  onClick={() => handleApprove(log.id)}
+                  className="px-3 py-1.5 bg-teal-700 text-white text-xs font-medium rounded-lg"
+                >
+                  Approve
+                </button>
+              )}
             </div>
           ))
         )}
@@ -173,6 +199,91 @@ export default function SupervisorPage() {
         )}
       </div>
 
+      {/* Scheduled tasks */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-gray-900">Scheduled tasks</h3>
+          {canWrite && (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="text-xs font-medium text-navy-700"
+            >
+              {showForm ? 'Cancel' : '+ Schedule'}
+            </button>
+          )}
+        </div>
+      
+        {/* Schedule form — only for head_of_department, technician, supervisor */}
+        {canWrite && showForm && (
+          <div className="flex flex-col gap-3 mb-4 p-3 bg-gray-50 rounded-xl">
+            <div className="field">
+              <label>Asset</label>
+              <select
+                value={form.asset_id}
+                onChange={e => setForm({ ...form, asset_id: e.target.value })}
+              >
+                <option value="">Select asset</option>
+                {assets.map(a => (
+                  <option key={a.id} value={a.id}>{a.name} ({a.asset_code})</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label>Scheduled date</label>
+              <input
+                type="date"
+                value={form.scheduled_for}
+                onChange={e => setForm({ ...form, scheduled_for: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Task type</label>
+              <select
+                value={form.task_type}
+                onChange={e => setForm({ ...form, task_type: e.target.value })}
+              >
+                <option value="preventive">Preventive</option>
+                <option value="corrective">Corrective</option>
+                <option value="inspection">Inspection</option>
+                <option value="overhaul">Overhaul</option>
+              </select>
+            </div>
+            <div className="field">
+              <label>Notes</label>
+              <textarea
+                placeholder="Optional instructions..."
+                value={form.notes}
+                onChange={e => setForm({ ...form, notes: e.target.value })}
+                style={{ minHeight: 60 }}
+              />
+            </div>
+            <button onClick={handleSchedule} className="btn-primary w-full text-sm">
+              Save schedule
+            </button>
+          </div>
+        )}
+      
+        {/* Task list — all roles see this */}
+        {scheduled.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-3">No tasks scheduled yet</p>
+        ) : (
+          scheduled.map(task => (
+            <div key={task.id} className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0">
+              <div className="flex-1">
+                <p className="text-xs font-mono font-medium text-gray-900">{task.asset_id}</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {task.task_type} · {task.scheduled_for}
+                </p>
+                {task.notes && (
+                  <p className="text-xs text-gray-400 mt-0.5">{task.notes}</p>
+                )}
+              </div>
+              <span className="badge badge-blue">{task.status}</span>
+            </div>
+          ))
+        )}
+      </div>
+      
       {/* Record retrieval comparison — keep as is, it's a fixed comparison */}
       <div className="card">
         <h3 className="text-sm font-medium text-gray-900 mb-4">Record retrieval time</h3>
