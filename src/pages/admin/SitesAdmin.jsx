@@ -132,8 +132,16 @@ function SiteModal({ site, onSave, onClose }) {
   }
 
   return (
-    <Modal title={site ? 'Edit site' : 'Add new site'} onClose={onClose}>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 pb-4">
+     <Modal
+      title={site ? 'Edit site' : 'Add new site'}
+      onClose={onClose}
+      footer={
+        <button type="submit" form="site-form" disabled={saving} className="btn-primary w-full disabled:opacity-60">
+          {saving ? 'Saving…' : site ? 'Save changes' : 'Add site'}
+        </button>
+      }
+    >
+      <form id="site-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="field">
           <label>Site name *</label>
           <input placeholder="e.g. Machine Shop"
