@@ -45,6 +45,12 @@ export default function Modal({ title, onClose, children, wide = false }) {
         <div className="overflow-y-auto flex-1 px-5 py-4">
           {children}
         </div>
+
+        {footer && (
+          <div className="px-5 py-4 border-t border-gray-100 bg-white rounded-b-3xl">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   )
