@@ -20,7 +20,6 @@ export default function ScheduleModal({ asset, onClose, onScheduled }) {
     notes:         '',
   })
 
-  // Fetch all assets from Firestore directly — no backend dependency
   useEffect(() => {
     fetchAllAssetsAdmin()
       .then(setAssets)
@@ -37,39 +36,9 @@ export default function ScheduleModal({ asset, onClose, onScheduled }) {
       addToast('Please pick a date', 'warning')
       return
     }
-  
-    setSaving(true)
-    try {
-      await addDoc(collection(db, 'scheduled_tasks'), {
-        asset_id:      form.asset_id,
-        scheduled_for: form.scheduled_for,
-        task_type:     form.task_type,
-        notes:         form.notes || '',
-        status:        'pending',
-        created_at:    serverTimestamp(),
-      })
-  
-      await addDoc(collection(db, 'reminders'), {
-        asset_id:   form.asset_id,
-        type:       form.task_type,
-        due_date:   form.scheduled_for,
-        status:     'pending',
-        due_label:  'Scheduled',
-        created_at: serverTimestamp(),
-      })
-  
-      onScheduled()
-    } catch (err) {
-      console.error('scheduleTask error:', err)
-      addToast(err.message || 'Failed to schedule task', 'error')
-    } finally {
-      setSaving(false)
-    }
-  }
 
     setSaving(true)
     try {
-      // Write directly to Firestore — consistent with the rest of the app
       await addDoc(collection(db, 'scheduled_tasks'), {
         asset_id:      form.asset_id,
         scheduled_for: form.scheduled_for,
@@ -78,6 +47,16 @@ export default function ScheduleModal({ asset, onClose, onScheduled }) {
         status:        'pending',
         created_at:    serverTimestamp(),
       })
+
+      await addDoc(collection(db, 'reminders'), {
+        asset_id:  form.asset_id,
+        type:      form.task_type,
+        due_date:  form.scheduled_for,
+        status:    'pending',
+        due_label: 'Scheduled',
+        created_at: serverTimestamp(),
+      })
+
       onScheduled()
     } catch (err) {
       console.error('scheduleTask error:', err)
@@ -103,7 +82,6 @@ export default function ScheduleModal({ asset, onClose, onScheduled }) {
     >
       <div className="flex flex-col gap-4">
 
-        {/* Asset selector — pre-selected if opened from asset detail page */}
         <div className="field">
           <label>Asset *</label>
           {loading ? (
