@@ -251,8 +251,17 @@ function AssetModal({ asset, sites, categories, statusOpts, onSave, onClose }) {
   }
 
   return (
-    <Modal title={asset ? 'Edit asset' : 'Register new asset'} onClose={onClose}>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 pb-4">
+  return (
+    <Modal
+      title={asset ? 'Edit asset' : 'Register new asset'}
+      onClose={onClose}
+      footer={
+        <button type="submit" form="asset-form" disabled={saving} className="btn-primary w-full disabled:opacity-60">
+          {saving ? 'Saving…' : asset ? 'Save changes' : 'Register asset'}
+        </button>
+      }
+    >
+      <form id="asset-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 
         {/* Name */}
         <div className="field">
