@@ -34,8 +34,8 @@ export default function AssetDetailPage() {
       setAsset(a)
       if (a) {
         const [l, p] = await Promise.all([
-          fetchLogsForAsset(a.id),
-          fetchPartsForAsset(a.id),
+          fetchLogsForAsset(a.asset_code),
+          fetchPartsForAsset(a.asset_code),
         ])
         setLogs(l)
         setParts(p)
