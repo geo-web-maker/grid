@@ -8,9 +8,15 @@ export function useSyncInit() {
   const { setOnline, setSyncing, setLastSynced, setQueueCount, addToast } = useAppStore()
 
   useEffect(() => {
+    // Refresh queue count from local DB — call this after any sync or status change
+    const refreshCount = async () => {
+      const queue = await getPendingQueue()
+      setQueueCount(queue.length)
+    }
+
     // Track online/offline
-    const handleOnline  = () => setOnline(true)
-    const handleOffline = () => setOnline(false)
+    const handleOnline  = () => { setOnline(true);  refreshCount() }
+    const handleOffline = () => { setOnline(false); refreshCount() }
     window.addEventListener('online',  handleOnline)
     window.addEventListener('offline', handleOffline)
 
@@ -18,12 +24,14 @@ export function useSyncInit() {
     const cleanup = initAutoSync(async (result) => {
       setSyncing(false)
       setLastSynced(new Date())
-      const queue = await getPendingQueue()
-      setQueueCount(queue.length)
-      if (result.synced > 0) {
+      await refreshCount()   // ← always reflects actual post-sync state
+      if (result?.synced > 0) {
         addToast(`Synced ${result.synced} record${result.synced > 1 ? 's' : ''}`, 'success')
       }
     })
+
+    // ← Set correct count immediately on mount
+    refreshCount()
 
     return () => {
       window.removeEventListener('online',  handleOnline)
