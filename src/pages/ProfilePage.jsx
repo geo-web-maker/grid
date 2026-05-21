@@ -13,6 +13,7 @@ export default function ProfilePage() {
   const [syncing, setSyncingLocal] = useState(false)
   const [queueCount, setQueueCount] = useState(0)
   const [myLogs, setMyLogs] = useState([])
+  const [storageUsed, setStorageUsed] = useState(null)
 
   useEffect(() => {
     if (user?.uid) {
@@ -21,6 +22,14 @@ export default function ProfilePage() {
         .catch(() => {})
     }
   }, [user])
+
+  useEffect(() => {
+    if (navigator.storage?.estimate) {
+      navigator.storage.estimate().then(({ usage, quota }) => {
+        setStorageUsed({ usage, quota })
+      })
+    }
+  }, [])
   
   const handleLogout = async () => {
     await logout()
@@ -177,13 +186,29 @@ export default function ProfilePage() {
         <div className="card">
           <h3 className="text-sm font-medium text-gray-900 mb-3">Offline storage</h3>
           <p className="text-xs text-gray-400 mb-1.5">Local cache used</p>
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: '34%', background: '#0C447C' }} />
-          </div>
-          <div className="flex justify-between mt-1.5 text-[11px] font-mono">
-            <span className="text-navy-800">3.4 MB used</span>
-            <span className="text-gray-400">10 MB limit</span>
-          </div>
+          {storageUsed ? (
+            <>
+              <div className="progress-track">
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${Math.min((storageUsed.usage / storageUsed.quota) * 100, 100).toFixed(1)}%`,
+                    background: '#0C447C'
+                  }}
+                />
+              </div>
+              <div className="flex justify-between mt-1.5 text-[11px] font-mono">
+                <span className="text-navy-800">
+                  {(storageUsed.usage / 1024 / 1024).toFixed(1)} MB used
+                </span>
+                <span className="text-gray-400">
+                  {(storageUsed.quota / 1024 / 1024 / 1024).toFixed(1)} GB available
+                </span>
+              </div>
+            </>
+          ) : (
+            <p className="text-xs text-gray-400">Storage info unavailable</p>
+          )}
         </div>
 
         {/* App version */}
