@@ -217,7 +217,6 @@ function PartModal({ part, onSave, onClose }) {
   }
 
   return (
-   return (
     <Modal
       title={part ? 'Edit part' : 'Add part to catalogue'}
       onClose={onClose}
