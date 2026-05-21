@@ -5,15 +5,18 @@ import { fetchAssetByCode, fetchLogsForAsset, fetchPartsForAsset } from '../lib/
 import { getLocalAssetByCode } from '../lib/localDb'
 import useAppStore from '../store/useAppStore'
 import { fetchAssetReport } from '../lib/adminService'
+import ScheduleModal from '../components/ScheduleModal'
 
 export default function AssetDetailPage() {
   const { assetCode } = useParams()
   const navigate      = useNavigate()
-  const { isOnline, addToast } = useAppStore()
+  const { isOnline, addToast, userProfile } = useAppStore()
+  const canSchedule = CAN_WRITE_ROLES.includes(userProfile?.role)
   const [asset, setAsset]   = useState(null)
   const [logs,  setLogs]    = useState([])
   const [parts, setParts]   = useState([])
   const [loading, setLoading] = useState(true)
+  const [showSchedule, setShowSchedule] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -122,12 +125,27 @@ export default function AssetDetailPage() {
       </div>
 
       {/* CTA */}
-    <div className="grid grid-cols-3 gap-2 p-3.5 border-t border-gray-100 bg-white flex-shrink-0">
+    <div className={`grid gap-2 p-3.5 border-t border-gray-100 bg-white flex-shrink-0 ${canSchedule ? 'grid-cols-2' : 'grid-cols-3'}`}>
+      {!canSchedule && (
         <button className="btn-secondary text-sm" onClick={() => navigate('/scan')}>Scan QR</button>
-        <button className="btn-secondary text-sm" onClick={handlePrintReport}>Print report</button>
-        <button className="btn-primary text-sm"   onClick={() => navigate(`/log/${asset.asset_code}`)}>Log maintenance</button>
-      </div>
+      )}
+      <button className="btn-secondary text-sm" onClick={handlePrintReport}>Print report</button>
+      {canSchedule && (
+        <button className="btn-secondary text-sm" onClick={() => setShowSchedule(true)}>Schedule</button>
+      )}
+      <button className="btn-primary text-sm" onClick={() => navigate(`/log/${asset.asset_code}`)}>Log maintenance</button>
     </div>
+
+    {showSchedule && (
+      <ScheduleModal
+        asset={asset}
+        onClose={() => setShowSchedule(false)}
+        onScheduled={() => {
+          setShowSchedule(false)
+          addToast('Task scheduled', 'success')
+        }}
+      />
+    )}
   )
 }
 
