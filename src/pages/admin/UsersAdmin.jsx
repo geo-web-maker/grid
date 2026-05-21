@@ -211,7 +211,6 @@ function UserModal({ user, sites, userProfile, onSave, onClose }) {
   }
 
   return (
-return (
     <Modal
       title={user ? 'Edit user' : 'Add new user'}
       onClose={onClose}
