@@ -7,10 +7,18 @@ import useAppStore from '../store/useAppStore'
 import { CAN_WRITE_ROLES } from '../lib/adminService'
 import ScheduleModal from '../components/ScheduleModal'
 
+//debugging
+import { getAuth } from 'firebase/auth'
+
 export default function AssetDetailPage() {
   const { assetCode } = useParams()
   const navigate      = useNavigate()
   const { isOnline, addToast, userProfile } = useAppStore()
+
+  //debugging
+  console.log('Auth UID:', getAuth().currentUser?.uid)  // ← add this line
+  console.log('UserProfile:', userProfile)               // ← and this one
+
   const canSchedule = CAN_WRITE_ROLES.includes(userProfile?.role)
   const [asset, setAsset]   = useState(null)
   const [logs,  setLogs]    = useState([])
