@@ -1,7 +1,7 @@
 // src/components/admin/Modal.jsx
 import { useEffect } from 'react'
 
-export default function Modal({ title, onClose, children, wide = false }) {
+export default function Modal({ title, onClose, children, footer, wide = false }) {
   // Close on Escape key
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -41,11 +41,12 @@ export default function Modal({ title, onClose, children, wide = false }) {
           </button>
         </div>
 
-        {/* Content */}
+        {/* Scrollable content */}
         <div className="overflow-y-auto flex-1 px-5 py-4">
           {children}
         </div>
 
+        {/* Pinned footer — submit button lives here */}
         {footer && (
           <div className="px-5 py-4 border-t border-gray-100 bg-white rounded-b-3xl">
             {footer}
