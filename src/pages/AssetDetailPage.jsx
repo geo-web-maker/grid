@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { fetchAssetByCode, fetchLogsForAsset, fetchPartsForAsset } from '../lib/firestoreService'
 import { getLocalAssetByCode } from '../lib/localDb'
 import useAppStore from '../store/useAppStore'
-import { fetchAssetReport } from '../lib/adminService'
+import { CAN_WRITE_ROLES } from '../lib/adminService'
 import ScheduleModal from '../components/ScheduleModal'
 
 export default function AssetDetailPage() {
@@ -57,7 +57,7 @@ export default function AssetDetailPage() {
       addToast('Failed to generate report', 'error')
     }
   }
-  
+
   if (loading) return <div className="scroll-area"><div className="h-32 bg-gray-100 rounded-2xl animate-pulse" /></div>
   if (!asset)  return <div className="scroll-area"><p className="text-center text-sm text-gray-400 py-8">Asset not found</p></div>
 
@@ -83,17 +83,17 @@ export default function AssetDetailPage() {
           <h3 className="text-sm font-medium text-gray-900 mb-3">Asset info</h3>
           <table className="w-full text-xs">
             <tbody>
-                {[
-                  ['Category',      asset.category],
-                  ['Make / Brand',  asset.make          || '—'],
-                  ['Model',         asset.model         || '—'],
-                  ['Serial No.',    asset.serial_number || '—'],
-                  ['Year acquired', asset.year_acquired || '—'],
-                  ['Location',      asset.site_id],
-                  ['PM interval',   `Every ${asset.pm_interval_days || 30} days`],
-                  ['Next PM due',   asset.next_pm_due?.toDate?.()?.toLocaleDateString() || 'N/A'],
-                  ['Total logs',    `${logs.length} entries`],
-                ].map(([label, val]) => (
+              {[
+                ['Category',      asset.category],
+                ['Make / Brand',  asset.make          || '—'],
+                ['Model',         asset.model         || '—'],
+                ['Serial No.',    asset.serial_number || '—'],
+                ['Year acquired', asset.year_acquired || '—'],
+                ['Location',      asset.site_id],
+                ['PM interval',   `Every ${asset.pm_interval_days || 30} days`],
+                ['Next PM due',   asset.next_pm_due?.toDate?.()?.toLocaleDateString() || 'N/A'],
+                ['Total logs',    `${logs.length} entries`],
+              ].map(([label, val]) => (
                 <tr key={label} className="border-t border-gray-50 first:border-0">
                   <td className="text-gray-400 py-1.5 w-2/5">{label}</td>
                   <td className="text-gray-900 font-medium py-1.5">{val}</td>
@@ -125,27 +125,28 @@ export default function AssetDetailPage() {
       </div>
 
       {/* CTA */}
-    <div className={`grid gap-2 p-3.5 border-t border-gray-100 bg-white flex-shrink-0 ${canSchedule ? 'grid-cols-2' : 'grid-cols-3'}`}>
-      {!canSchedule && (
-        <button className="btn-secondary text-sm" onClick={() => navigate('/scan')}>Scan QR</button>
-      )}
-      <button className="btn-secondary text-sm" onClick={handlePrintReport}>Print report</button>
-      {canSchedule && (
-        <button className="btn-secondary text-sm" onClick={() => setShowSchedule(true)}>Schedule</button>
-      )}
-      <button className="btn-primary text-sm" onClick={() => navigate(`/log/${asset.asset_code}`)}>Log maintenance</button>
-    </div>
+      <div className={`grid gap-2 p-3.5 border-t border-gray-100 bg-white flex-shrink-0 ${canSchedule ? 'grid-cols-2' : 'grid-cols-3'}`}>
+        {!canSchedule && (
+          <button className="btn-secondary text-sm" onClick={() => navigate('/scan')}>Scan QR</button>
+        )}
+        <button className="btn-secondary text-sm" onClick={handlePrintReport}>Print report</button>
+        {canSchedule && (
+          <button className="btn-secondary text-sm" onClick={() => setShowSchedule(true)}>Schedule</button>
+        )}
+        <button className="btn-primary text-sm" onClick={() => navigate(`/log/${asset.asset_code}`)}>Log maintenance</button>
+      </div>
 
-    {showSchedule && (
-      <ScheduleModal
-        asset={asset}
-        onClose={() => setShowSchedule(false)}
-        onScheduled={() => {
-          setShowSchedule(false)
-          addToast('Task scheduled', 'success')
-        }}
-      />
-    )}
+      {showSchedule && (
+        <ScheduleModal
+          asset={asset}
+          onClose={() => setShowSchedule(false)}
+          onScheduled={() => {
+            setShowSchedule(false)
+            addToast('Task scheduled', 'success')
+          }}
+        />
+      )}
+    </div>
   )
 }
 
