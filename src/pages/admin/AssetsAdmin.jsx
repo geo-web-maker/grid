@@ -251,7 +251,6 @@ function AssetModal({ asset, sites, categories, statusOpts, onSave, onClose }) {
   }
 
   return (
-  return (
     <Modal
       title={asset ? 'Edit asset' : 'Register new asset'}
       onClose={onClose}
