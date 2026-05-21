@@ -95,6 +95,12 @@ export async function scheduleTask(data) {
   return json
 }
 
+// AFTER — delete the whole function above, the ScheduleModal writes to Firestore directly now
+// You can leave the function removed, or keep a no-op stub if anything else imports it:
+export async function scheduleTask() {
+  throw new Error('Use ScheduleModal which writes directly to Firestore')
+}
+
 export async function fetchAssetReport(assetId) {
   const headers = await getAuthHeader()
   const res = await fetch(`${API}/asset-report/${assetId}`, { headers })
