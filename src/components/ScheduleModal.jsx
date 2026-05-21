@@ -37,6 +37,35 @@ export default function ScheduleModal({ asset, onClose, onScheduled }) {
       addToast('Please pick a date', 'warning')
       return
     }
+  
+    setSaving(true)
+    try {
+      await addDoc(collection(db, 'scheduled_tasks'), {
+        asset_id:      form.asset_id,
+        scheduled_for: form.scheduled_for,
+        task_type:     form.task_type,
+        notes:         form.notes || '',
+        status:        'pending',
+        created_at:    serverTimestamp(),
+      })
+  
+      await addDoc(collection(db, 'reminders'), {
+        asset_id:   form.asset_id,
+        type:       form.task_type,
+        due_date:   form.scheduled_for,
+        status:     'pending',
+        due_label:  'Scheduled',
+        created_at: serverTimestamp(),
+      })
+  
+      onScheduled()
+    } catch (err) {
+      console.error('scheduleTask error:', err)
+      addToast(err.message || 'Failed to schedule task', 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
 
     setSaving(true)
     try {
