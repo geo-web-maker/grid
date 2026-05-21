@@ -211,8 +211,17 @@ function UserModal({ user, sites, userProfile, onSave, onClose }) {
   }
 
   return (
-    <Modal title={user ? 'Edit user' : 'Add new user'} onClose={onClose}>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 pb-4">
+return (
+    <Modal
+      title={user ? 'Edit user' : 'Add new user'}
+      onClose={onClose}
+      footer={
+        <button type="submit" form="user-form" disabled={saving} className="btn-primary w-full disabled:opacity-60">
+          {saving ? 'Saving…' : user ? 'Save changes' : 'Add user'}
+        </button>
+      }
+    >
+      <form id="user-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="field">
           <label>Full name *</label>
           <input placeholder="e.g. Ocen Howard" {...register('name', { required: 'Required' })} />
