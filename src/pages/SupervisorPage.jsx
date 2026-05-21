@@ -283,23 +283,6 @@ export default function SupervisorPage() {
           ))
         )}
       </div>
-      
-      {/* Record retrieval comparison — keep as is, it's a fixed comparison */}
-      <div className="card">
-        <h3 className="text-sm font-medium text-gray-900 mb-4">Record retrieval time</h3>
-        <div className="flex items-center gap-4">
-          <div className="text-center flex-1">
-            <p className="text-2xl font-mono font-medium text-navy-800">4.2s</p>
-            <p className="text-xs text-gray-400 mt-1">Digital (now)</p>
-          </div>
-          <div className="h-8 w-px bg-gray-100" />
-          <div className="text-center flex-1">
-            <p className="text-2xl font-mono font-medium text-gray-300">14m</p>
-            <p className="text-xs text-gray-400 mt-1">Paper (before)</p>
-          </div>
-        </div>
-      </div>
-
     </div>
   )
 }
