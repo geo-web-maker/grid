@@ -1,81 +1,54 @@
-rules_version = '2';
+rules_version = '3';
 service cloud.firestore {
   match /databases/{database}/documents {
-
     function isAuth() {
       return request.auth != null;
     }
-
     function hasRole(role) {
       return isAuth() &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
     }
-
     function isHoD()        { return hasRole('head_of_department'); }
     function isTechnician() { return hasRole('technician'); }
     function isSupervisor() { return hasRole('supervisor'); }
     function canWrite()     { return isHoD() || isTechnician() || isSupervisor(); }
 
-    // ── Users ──────────────────────────────────────────────────────────────
     match /users/{userId} {
-      // Everyone logged in can read — needed for the Users tab and profile lookups
       allow read: if isAuth();
-
-      // Only HoD creates, updates, or deletes users
       allow create: if isHoD();
       allow update: if isHoD() || request.auth.uid == userId;
       allow delete: if isHoD();
     }
-
-    // ── Sites ──────────────────────────────────────────────────────────────
     match /sites/{siteId} {
       allow read:  if isAuth();
       allow write: if isHoD();
     }
-
-    // ── Assets ─────────────────────────────────────────────────────────────
     match /assets/{assetId} {
       allow read:   if isAuth();
       allow create: if isHoD();
       allow update: if isHoD();
       allow delete: if isHoD();
     }
-
-    // ── Maintenance logs ───────────────────────────────────────────────────
     match /maintenance_logs/{logId} {
-      allow read: if isAuth();
-
-      // HoD, technician, supervisor can create logs
+      allow read:   if isAuth();
       allow create: if canWrite();
-
-      // HoD, technician, supervisor can update (approve, edit)
       allow update: if canWrite();
-
-      // Only HoD can delete
       allow delete: if isHoD();
     }
-
-    // ── Spare parts ────────────────────────────────────────────────────────
     match /spare_parts/{partId} {
       allow read:   if isAuth();
       allow create: if canWrite();
       allow update: if canWrite();
       allow delete: if isHoD();
     }
-
-    // ── Parts catalogue ────────────────────────────────────────────────────
     match /parts_catalogue/{partId} {
       allow read:  if isAuth();
       allow write: if isHoD();
     }
-
-    // ── Reminders ──────────────────────────────────────────────────────────
     match /reminders/{reminderId} {
       allow read:  if isAuth();
       allow write: if canWrite();
     }
-
-    // ── Scheduled tasks ────────────────────────────────────────────────────
     match /scheduled_tasks/{taskId} {
       allow read:   if isAuth();
       allow create: if canWrite();
