@@ -217,8 +217,17 @@ function PartModal({ part, onSave, onClose }) {
   }
 
   return (
-    <Modal title={part ? 'Edit part' : 'Add part to catalogue'} onClose={onClose}>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 pb-4">
+   return (
+    <Modal
+      title={part ? 'Edit part' : 'Add part to catalogue'}
+      onClose={onClose}
+      footer={
+        <button type="submit" form="part-form" disabled={saving} className="btn-primary w-full disabled:opacity-60">
+          {saving ? 'Saving…' : part ? 'Save changes' : 'Add to catalogue'}
+        </button>
+      }
+    >
+      <form id="part-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="field">
           <label>Part name *</label>
           <input placeholder="e.g. Bearing seal 45mm"
