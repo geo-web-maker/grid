@@ -274,10 +274,6 @@ function UserModal({ user, sites, userProfile, onSave, onClose }) {
             A Firebase Auth account will be created. The user receives an email with their credentials and must change their password on first login.
           </div>
         )}
-
-        <button type="submit" disabled={saving} className="btn-primary w-full mt-2 disabled:opacity-60">
-          {saving ? 'Saving…' : user ? 'Save changes' : 'Create user'}
-        </button>
       </form>
     </Modal>
   )
