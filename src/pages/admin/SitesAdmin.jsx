@@ -168,10 +168,6 @@ function SiteModal({ site, onSave, onClose }) {
             The site ID is auto-generated from the name (lowercase, hyphenated). It cannot be changed after creation.
           </div>
         )}
-
-        <button type="submit" disabled={saving} className="btn-primary w-full mt-2 disabled:opacity-60">
-          {saving ? 'Saving…' : site ? 'Save changes' : 'Add site'}
-        </button>
       </form>
     </Modal>
   )
