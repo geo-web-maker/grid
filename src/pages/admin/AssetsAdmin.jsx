@@ -347,10 +347,6 @@ function AssetModal({ asset, sites, categories, statusOpts, onSave, onClose }) {
             A unique asset code and QR code will be generated automatically after registration.
           </div>
         )}
-
-        <button type="submit" disabled={saving} className="btn-primary w-full mt-2 disabled:opacity-60">
-          {saving ? 'Saving…' : asset ? 'Save changes' : 'Register asset'}
-        </button>
       </form>
     </Modal>
   )
