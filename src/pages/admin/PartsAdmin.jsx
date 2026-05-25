@@ -266,10 +266,6 @@ function PartModal({ part, onSave, onClose }) {
           <textarea placeholder="Compatible assets, storage conditions, etc."
             {...register('notes')} />
         </div>
-
-        <button type="submit" disabled={saving} className="btn-primary w-full mt-2 disabled:opacity-60">
-          {saving ? 'Saving…' : part ? 'Save changes' : 'Add to catalogue'}
-        </button>
       </form>
     </Modal>
   )
