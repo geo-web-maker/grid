@@ -1,6 +1,6 @@
 {
-  "name": "uegcl-logbook-functions",
-  "description": "Firebase Cloud Functions for UEGCL QR Logbook",
+  "name": "Kyambogo-Digital-QR-logbook-functions",
+  "description": "Firebase Cloud Functions for Kyambogo Digital QR Logbook",
   "scripts": {
     "serve": "firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions"
