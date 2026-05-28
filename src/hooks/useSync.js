@@ -8,6 +8,8 @@ export function useSyncInit() {
   const { setOnline, setSyncing, setLastSynced, setQueueCount, addToast } = useAppStore()
 
   useEffect(() => {
+    if (!authReady) return //this is a guard
+    
     // Refresh queue count from local DB — call this after any sync or status change
     const refreshCount = async () => {
       const queue = await getPendingQueue()
