@@ -40,5 +40,5 @@ export function useSyncInit() {
       window.removeEventListener('offline', handleOffline)
       cleanup()
     }
-  }, [])
+  }, [authReady]) //add authReady to the dependency array
 }
