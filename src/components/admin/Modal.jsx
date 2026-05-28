@@ -20,7 +20,7 @@ export default function Modal({ title, onClose, children, footer, wide = false }
       {/* Sheet */}
       <div
         className={`relative w-full bg-white rounded-t-3xl shadow-2xl z-10 flex flex-col
-          ${wide ? 'max-h-[95vh]' : 'max-h-[90vh]'}`}
+          ${wide ? 'max-h-[calc(100dvh-20px)]' : 'max-h-[calc(100dvh-56px)]'}`}
         style={{ maxWidth: 480 }}
       >
         {/* Handle */}
@@ -48,7 +48,7 @@ export default function Modal({ title, onClose, children, footer, wide = false }
 
         {/* Pinned footer — submit button lives here */}
         {footer && (
-          <div className="px-5 py-4 border-t border-gray-100 bg-white rounded-b-3xl">
+          <div className="px-5 pt-4 border-t border-gray-100 bg-white rounded-b-3xl" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
             {footer}
           </div>
         )}
