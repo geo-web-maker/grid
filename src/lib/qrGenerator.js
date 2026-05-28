@@ -88,7 +88,7 @@ export async function printQRTag(asset) {
     </head>
     <body>
       <div class="tag">
-        <div class="org">Uganda Electricity Generation Company</div>
+        <div class="org">Kyambogo QR Digital Logbook</div>
         <hr class="divider">
         <img class="qr" src="${dataUrl}" alt="${asset.asset_code}" />
         <div class="code">${asset.asset_code}</div>
