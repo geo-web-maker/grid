@@ -10,7 +10,7 @@ export default function Modal({ title, onClose, children, footer, wide = false }
   }, [onClose])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -20,7 +20,7 @@ export default function Modal({ title, onClose, children, footer, wide = false }
       {/* Sheet */}
       <div
         className={`relative w-full bg-white rounded-t-3xl shadow-2xl z-10 flex flex-col
-          ${wide ? 'max-h-[calc(100dvh-20px)]' : 'max-h-[calc(100dvh-56px)]'}`}
+          ${wide ? 'max-h-[calc(100dvh-20px)]' : 'max-h-[calc(100dvh-64px)]'}`}
         style={{ maxWidth: 480 }}
       >
         {/* Handle */}
