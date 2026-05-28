@@ -5,7 +5,7 @@ import { initAutoSync } from '../lib/syncEngine'
 import { getPendingQueue } from '../lib/localDb'
 
 export function useSyncInit() {
-  const { setOnline, setSyncing, setLastSynced, setQueueCount, addToast } = useAppStore()
+  const {authReady, setOnline, setSyncing, setLastSynced, setQueueCount, addToast } = useAppStore()
 
   useEffect(() => {
     if (!authReady) return //this is a guard
