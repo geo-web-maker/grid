@@ -1,7 +1,7 @@
 // src/hooks/useAuth.js
 import { useEffect } from 'react'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
-import { getDoc, doc } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase'
 import { fetchUserProfile } from '../lib/firestoreService'
 import useAppStore from '../store/useAppStore'
@@ -13,29 +13,40 @@ export function useAuthInit() {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser)
+
+        // Always set authReady immediately so the app doesn't hang
+        // We'll update the profile whenever we can get it
+        setAuthReady(true)
+
         try {
           const profile = await fetchUserProfile(firebaseUser.uid)
-          setUserProfile(profile)
+          if (profile) setUserProfile(profile)
         } catch (err) {
-          console.warn('Could not fetch profile, trying local cache:', err.message)
+          console.warn('fetchUserProfile failed, trying Firestore cache:', err.message)
           try {
             const snap = await getDoc(doc(db, 'users', firebaseUser.uid))
             if (snap.exists()) setUserProfile({ id: snap.id, ...snap.data() })
-          } catch {
-            console.warn('No cached profile available offline')
+          } catch (err2) {
+            console.warn('No cached profile available:', err2.message)
+            // Set a minimal profile so the app can still render
+            setUserProfile({
+              uid:   firebaseUser.uid,
+              email: firebaseUser.email,
+              name:  firebaseUser.displayName || firebaseUser.email,
+              role:  'technician', // safe default
+            })
           }
         }
       } else {
         setUser(null)
         setUserProfile(null)
+        setAuthReady(true)
       }
-      setAuthReady(true)
     })
     return unsub
   }, [])
 }
 
-// ← these two were missing, LoginPage imports login and logout from here
 export async function login(email, password) {
   const cred = await signInWithEmailAndPassword(auth, email, password)
   return cred.user
