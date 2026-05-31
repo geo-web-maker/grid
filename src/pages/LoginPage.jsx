@@ -81,7 +81,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          Contact your site administrator to reset your password
+          Contact your site administrator to reset your password <b /> Sign in while connected at least once to enable offline access.
         </p>
       </div>
     </div>
